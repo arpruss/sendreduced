@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import android.app.Activity;
@@ -86,9 +85,17 @@ public class Utils {
 		if (data == null) 
 			return null;
 		
+		SendReduced.log("need to decode "+data.length+" bytes");
+
 		int o = getOrientation(cr, uri);
+		SendReduced.log("orientation = "+o);
 		
 		Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+		
+		if (bmp == null) {
+			SendReduced.log("error decoding");
+			return null;
+		}
 		
 		int h = bmp.getHeight();
 		int w = bmp.getWidth();
@@ -130,17 +137,17 @@ public class Utils {
 		return o;
 	}
 
-	static private String getPath(ContentResolver cr, Uri uri) {
-		Cursor c = 
-			android.provider.MediaStore.Images.Media.query(cr, uri, 
-					new String[]{MediaStore.Images.Media.DATA});
-		if (c == null)
-			return null;
-		c.moveToFirst();
-		String path = c.getString(c.getColumnIndex(MediaStore.Images.Media.DATA));
-		c.close();
-		return path;
-	}
+//	static private String getPath(ContentResolver cr, Uri uri) {
+//		Cursor c = 
+//			android.provider.MediaStore.Images.Media.query(cr, uri, 
+//					new String[]{MediaStore.Images.Media.DATA});
+//		if (c == null)
+//			return null;
+//		c.moveToFirst();
+//		String path = c.getString(c.getColumnIndex(MediaStore.Images.Media.DATA));
+//		c.close();
+//		return path;
+//	}
 
 	static private byte[] getStreamBytes(InputStream stream) {
 		List<byte[]> chunks = new ArrayList<byte[]>();
@@ -151,7 +158,8 @@ public class Utils {
 		try {
 			while (0 <= (read = stream.read(buffer))) {
 				byte[] chunk = new byte[read];
-				System.arraycopy(chunk, 0, buffer, 0, read);
+				System.arraycopy(buffer, 0, chunk, 0, read);
+				chunks.add(chunk);
 				total += read;
 			}
 		} catch (IOException e) {
