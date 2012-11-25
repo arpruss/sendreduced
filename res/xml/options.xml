@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+<ListPreference
+	android:title="Maximum resolution"
+	android:entries="@array/resolutions"    	
+	android:entryValues="@array/resolutions"
+	android:key="resolution"
+	android:defaultValue="1024"/>
+<ListPreference
+	android:title="JPEG quality"
+	android:entries="@array/qualities"    	
+	android:entryValues="@array/qualities"
+	android:key="quality"
+	android:defaultValue="85"/>
+</PreferenceScreen>
