@@ -12,5 +12,6 @@ public class Options extends PreferenceActivity {
 		super.onCreate(icicle);
 		
 		addPreferencesFromResource(R.xml.options);
+		Utils.cleanCache(this);
 	}
 }
