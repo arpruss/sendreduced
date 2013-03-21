@@ -1,5 +1,7 @@
 package mobi.omegacentauri.SendReduced;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
@@ -23,11 +25,32 @@ public class SendReduced extends Activity {
 		Bundle e = i.getExtras();
 		if (i.getAction().equals(Intent.ACTION_SEND)) {
 			if (e != null &&
-				e.containsKey(Intent.EXTRA_STREAM)) 
-				Utils.sendReduced(
-						this,
+				e.containsKey(Intent.EXTRA_STREAM))  {
+				new Utils(this).sendReduced(
 						(Uri)e.getParcelable(Intent.EXTRA_STREAM));
+			}
 			finish();
+		}
+		else if (i.getAction().equals(Intent.ACTION_SEND_MULTIPLE)) {
+			if (e != null &&
+					e.containsKey(Intent.EXTRA_STREAM)) {
+				ArrayList<Uri> in = e.getParcelableArrayList(Intent.EXTRA_STREAM);
+				ArrayList<Uri> out = new ArrayList<Uri>();
+				Utils utils = new Utils(this);
+				
+				for (Uri uri: in) {
+					Uri reduced = utils.reduce(uri);
+					if (reduced != null)
+						out.add(reduced);
+				}
+				
+				if (out.size()>0) {
+					Intent go = new Intent(android.content.Intent.ACTION_SEND_MULTIPLE);
+					go.setType("text/plain");
+					go.putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, out);
+					startActivity(go);
+				}
+			}
 		}
     }
 }

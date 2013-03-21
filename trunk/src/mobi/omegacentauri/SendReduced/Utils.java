@@ -30,24 +30,39 @@ public class Utils {
 	static final int INVALID_ROTATION = -360000;
 	static final String PREFIX = "Image";
 	static final long CLEAN_TIME = (2 * 86400l * 1000l);
+	Activity activity;
+	ContentResolver cr;
+	SharedPreferences options;
+	private int outResolution;
+	private int outQuality;
 	
-	public static boolean sendReduced(Activity a, Uri uri) {
-		ContentResolver cr = a.getContentResolver();
-		SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(a);
-		int resolution =  Integer.parseInt(options.getString(Options.PREF_RESOLUTION, "1024"));
-		ReducedImage image = new ReducedImage(cr, uri, resolution);
+	public Utils(Activity a) {
+		activity = a;
+		cr = a.getContentResolver();
+		options = PreferenceManager.getDefaultSharedPreferences(a);
+		outResolution =  Integer.parseInt(options.getString(Options.PREF_RESOLUTION, "1024"));
+		outQuality = Integer.parseInt(options.getString(Options.PREF_QUALITY, "85"));
+	}
+	
+	public Uri reduce(Uri uri) {
+		ReducedImage image = new ReducedImage(uri);
 		if (image.bmp == null)
-			return false;
+			return null;
 		SendReduced.log("Reduced to "+image.bmp.getWidth()+"x"+image.bmp.getHeight());
-		int quality = Integer.parseInt(options.getString(Options.PREF_QUALITY, "85"));
-		SendReduced.log("JPEG compression quality "+quality);
-		String path = saveImage(a, image.bmp, quality);
+		String path = saveImage(image);
 		if (path == null) 
+			return null;
+		return Uri.fromFile(new File(path));		
+	}
+	
+	public boolean sendReduced(Uri uri) {
+		Uri out = reduce(uri);
+		if (out == null)
 			return false;
 		Intent i = new Intent(android.content.Intent.ACTION_SEND);
 		i.setType("text/plain");
-		i.putExtra(android.content.Intent.EXTRA_STREAM, Uri.fromFile(new File(path)));
-		a.startActivity(i);
+		i.putExtra(android.content.Intent.EXTRA_STREAM, out);
+		activity.startActivity(i);
 		return true;
 	}
 	
@@ -61,16 +76,16 @@ public class Utils {
 		return storage;
 	}
 	
-	private static String saveImage(Context c, Bitmap bmp, int compress) {
-		cleanCache(c);
+	private String saveImage(ReducedImage ri) {
+		cleanCache(activity);
 		
-		File storage = getCacheDir(c);
+		File storage = getCacheDir(activity);
 		
 		try {
 			File temp = File.createTempFile(PREFIX, ".jpg", storage);
 			SendReduced.log("Compressing to "+temp);
 			FileOutputStream out = new FileOutputStream(temp);
-			boolean status = bmp.compress(Bitmap.CompressFormat.JPEG, compress, out);
+			boolean status = ri.bmp.compress(Bitmap.CompressFormat.JPEG, outQuality, out);
 			out.close();
 			if (!status) {
 				temp.delete();
@@ -89,8 +104,7 @@ public class Utils {
 
 			@Override
 			public boolean accept(File dir, String filename) {
-				return filename.toLowerCase().endsWith(".jpg") && 
-					filename.toLowerCase().startsWith(PREFIX.toLowerCase());
+				return filename.toLowerCase().endsWith(".jpg");
 			}});
 		
 		long t = System.currentTimeMillis();
@@ -156,30 +170,26 @@ public class Utils {
 		return data;
 	}
 
-	public static Uri offerReduced(Activity a, Uri uriIn) {
-		ContentResolver cr = a.getContentResolver();
+	public Uri offerReduced(Uri uriIn) {
+		ContentResolver cr = activity.getContentResolver();
 		int orientation = getOrientation(cr, uriIn);
 		SendReduced.log("orientation: "+orientation);
-		SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(a);
-		int resolution =  Integer.parseInt(options.getString(Options.PREF_RESOLUTION, "1024"));
-		ReducedImage image = new ReducedImage(cr, uriIn, resolution);
+		ReducedImage image = new ReducedImage(uriIn);
 		if (image.bmp == null)
 			return null;
 		SendReduced.log("Reduced to "+image.bmp.getWidth()+"x"+image.bmp.getHeight());
-		int quality = Integer.parseInt(options.getString(Options.PREF_QUALITY, "85"));
-		SendReduced.log("JPEG compression quality "+quality);
-		String path = saveImage(a, image.bmp, quality);
+		String path = saveImage(image);
 		if (path == null) 
 			return null;
 		else
 			return Uri.fromFile(new File(path));
 	}
 
-	static class ReducedImage {
+	class ReducedImage {
 		long date;
 		Bitmap bmp;
 		
-		public ReducedImage(ContentResolver cr, Uri uri, int resolution) {
+		public ReducedImage(Uri uri) {
 			bmp = null;
 			
 			SendReduced.log("Reducing "+uri);
@@ -219,11 +229,11 @@ public class Utils {
 			
 			Matrix m = new Matrix();
 			
-			if (h > resolution || w > resolution) {
+			if (h > outResolution || w > outResolution) {
 				if (h>w)
-					m.postScale(resolution / (float)h, resolution / (float)h);
+					m.postScale(outResolution / (float)h, outResolution / (float)h);
 				else
-					m.postScale(resolution / (float)w, resolution / (float)w);
+					m.postScale(outResolution / (float)w, outResolution / (float)w);
 				transform = true;
 			}
 			

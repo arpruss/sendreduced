@@ -39,7 +39,7 @@ public class GetReduced extends Activity {
     		setResult(RESULT_CANCELED);
     	}
     	else {
-    		Uri uri = Utils.offerReduced(this, data.getData());
+    		Uri uri = new Utils(this).offerReduced(data.getData());
     		if (uri == null)
     			setResult(RESULT_CANCELED);
     		else
