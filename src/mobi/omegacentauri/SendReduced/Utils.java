@@ -35,6 +35,7 @@ public class Utils {
 	SharedPreferences options;
 	private int outResolution;
 	private int outQuality;
+	static final String MIME_TYPE = "image/jpeg"; //"text/plain";
 	
 	public Utils(Activity a) {
 		activity = a;
@@ -60,7 +61,7 @@ public class Utils {
 		if (out == null)
 			return false;
 		Intent i = new Intent(android.content.Intent.ACTION_SEND);
-		i.setType("text/plain");
+		i.setType(MIME_TYPE);
 		i.putExtra(android.content.Intent.EXTRA_STREAM, out);
 		activity.startActivity(i);
 		return true;
