@@ -3,6 +3,7 @@
 
     <string name="app_name">Send Reduced</string>
     <string-array name="resolutions">
+        <item>256</item>
         <item>512</item>
         <item>640</item>
         <item>800</item>

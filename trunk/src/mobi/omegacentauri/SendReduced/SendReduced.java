@@ -46,7 +46,7 @@ public class SendReduced extends Activity {
 				
 				if (out.size()>0) {
 					Intent go = new Intent(android.content.Intent.ACTION_SEND_MULTIPLE);
-					go.setType("text/plain");
+					go.setType(Utils.MIME_TYPE);
 					go.putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, out);
 					startActivity(go);
 				}
