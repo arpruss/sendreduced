@@ -68,12 +68,16 @@ public class Utils {
 	}
 	
 	private static File getCacheDir(Context c) {
-		File storage;
+		File storage = null;
+		
 		if (Build.VERSION.SDK_INT >= 8)
 			storage = c.getExternalCacheDir();
-		else
+		
+		if (storage == null)
 			storage = new File(Environment.getExternalStorageDirectory().getPath()+"/SendReduced");
+		
 		storage.mkdir();
+		
 		return storage;
 	}
 	
@@ -119,15 +123,20 @@ public class Utils {
 	}
 
 	static private int getOrientation(ContentResolver cr, Uri uri) {
-		Cursor c = 
-			android.provider.MediaStore.Images.Media.query(cr, uri, 
-					new String[]{MediaStore.Images.Media.ORIENTATION});
-		if (c == null)
+		try {
+			Cursor c = 
+				android.provider.MediaStore.Images.Media.query(cr, uri, 
+						new String[]{MediaStore.Images.Media.ORIENTATION});
+			if (c == null)
+				return INVALID_ROTATION;
+			c.moveToFirst();
+			int o = c.getInt(c.getColumnIndex(MediaStore.Images.Media.ORIENTATION));
+			c.close();
+			return o;
+		}
+		catch(Exception e) {
 			return INVALID_ROTATION;
-		c.moveToFirst();
-		int o = c.getInt(c.getColumnIndex(MediaStore.Images.Media.ORIENTATION));
-		c.close();
-		return o;
+		}
 	}
 
 //	static private String getPath(ContentResolver cr, Uri uri) {
