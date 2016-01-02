@@ -13,4 +13,10 @@
 	android:entryValues="@array/qualities"
 	android:key="quality"
 	android:defaultValue="85"/>
+<ListPreference
+	android:title="Output filename"
+	android:entries="@array/outputs"    	
+	android:entryValues="@array/outputs"
+	android:key="output"
+	android:defaultValue="random"/>
 </PreferenceScreen>

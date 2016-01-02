@@ -1,12 +1,15 @@
 package mobi.omegacentauri.SendReduced;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.app.Activity;
@@ -26,6 +29,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Images;
 import android.util.Log;
 
 public class Utils {
@@ -38,8 +42,11 @@ public class Utils {
 	SharedPreferences options;
 	private int outResolution;
 	private int outQuality;
+	private int sequencePos;
 	static final String MIME_TYPE = "image/jpeg"; //"text/plain";
 	public static final String INTENT_FROM_ME = "mobi.omegacentauri.SendReduced.INTENT_FROM_ME";
+	private String curCacheDir;
+	private long curTime;
 	
 	public Utils(Activity a) {
 		activity = a;
@@ -47,6 +54,22 @@ public class Utils {
 		options = PreferenceManager.getDefaultSharedPreferences(a);
 		outResolution =  Integer.parseInt(options.getString(Options.PREF_RESOLUTION, "1024"));
 		outQuality = Integer.parseInt(options.getString(Options.PREF_QUALITY, "85"));
+		sequencePos = 1;
+		
+		curTime = System.currentTimeMillis();
+		cleanCache(a, curTime);
+		curCacheDir = null;
+		String base = getCacheDir(a).getPath() + "/" + curTime;
+		for (int i = 0 ; i < 1000000 ; i++) {
+			String n = base + "-" + i;
+			if (! new File(n).exists()) {
+				curCacheDir = n;
+				break;
+			}
+		}
+		if (curCacheDir == null) 
+			curCacheDir = getCacheDir(a).getPath() + "/0";
+		new File(curCacheDir).mkdirs();
 	}
 	
 	public Uri reduce(Uri uri) {
@@ -75,21 +98,21 @@ public class Utils {
 	
 	private static File getCacheDir(Context c) {
 		File storage;
+		
 		if (Build.VERSION.SDK_INT >= 8)
 			storage = c.getExternalCacheDir();
 		else
 			storage = new File(Environment.getExternalStorageDirectory().getPath()+"/SendReduced");
+		
 		storage.mkdir();
 		return storage;
 	}
 	
 	private String saveImage(ReducedImage ri) {
-		cleanCache(activity);
-		
-		File storage = getCacheDir(activity);
+//		File storage = getCacheDir(activity);
 		
 		try {
-			File temp = File.createTempFile(PREFIX, ".jpg", storage);
+			File temp = ri.createOutFile(); //File.createTempFile(PREFIX, ".jpg", storage);
 			SendReduced.log("Compressing to "+temp);
 			FileOutputStream out = new FileOutputStream(temp);
 			boolean status = ri.bmp.compress(Bitmap.CompressFormat.JPEG, outQuality, out);
@@ -106,20 +129,35 @@ public class Utils {
 		
 	}
 	
-	public static void cleanCache(Context c) {		
-		File[] list = getCacheDir(c).listFiles(new FilenameFilter(){
+	public static void cleanCache(Context c, Long curTime) {		
+		SendReduced.log("cleanCache "+getCacheDir(c));
+		File[] dirs = getCacheDir(c).listFiles(new FileFilter(){
 
 			@Override
-			public boolean accept(File dir, String filename) {
-				return filename.toLowerCase().endsWith(".jpg");
+			public boolean accept(File f) {
+				return f.isDirectory();
 			}});
-		
-		long t = System.currentTimeMillis();
-		for (File f: list) {			
-			if (f.lastModified() < t - CLEAN_TIME ||
-					t + CLEAN_TIME < f.lastModified()) {
-				SendReduced.log("cleaning up "+f);
+
+		// previous version files
+		for (File f : getCacheDir(c).listFiles()) {
+			SendReduced.log("checking "+f.getName());
+			if (f.getPath().toLowerCase().endsWith(".jpg"))
 				f.delete();
+		}
+		
+		for (File d : dirs) {
+			String n = d.getName();
+			try {
+				long t = Long.parseLong(n.split("-")[0]);
+				if (t < curTime - CLEAN_TIME ||
+						curTime + CLEAN_TIME < t) {
+					SendReduced.log("cleaning up "+d.getPath());
+					for (File f : d.listFiles())
+						f.delete();
+					d.delete();
+				}
+			}
+			catch(Exception e) {
 			}
 		}
 	}
@@ -193,8 +231,9 @@ public class Utils {
 	}
 
 	class ReducedImage {
-		long date;
+		long origDate;
 		Bitmap bmp;
+		String origName;
 		
 		public ReducedImage(Uri uri) {
 			bmp = null;
@@ -211,12 +250,43 @@ public class Utils {
 			if (data == null) 
 				return;
 			
-			date = -1;
+			origDate = -1;
+			origName = null;
 			if (uri.getScheme().equalsIgnoreCase("file")) {
 				File f = new File(uri.getPath());
-				date = f.lastModified();
+				origDate = f.lastModified();
+				origName = f.getName();
+			}
+			else if (uri.getScheme().equalsIgnoreCase("content")) {
+				Cursor c = cr.query(uri, null, null, null, null);
+				if (c != null) {
+					if (c.moveToFirst()) {
+						try {
+							int id = c.getColumnIndex(Images.Media.DATA);
+							if (id != -1) 
+								origName = new File(c.getString(id)).getName();
+
+							id = c.getColumnIndex(Images.Media.DATE_ADDED);
+							if (id != -1) {
+								origDate = c.getInt(id);
+							}
+							else {
+								id = c.getColumnIndex(Images.Media.DATE_MODIFIED);
+								if (id != -1)
+									origDate = c.getInt(id);
+							}
+						}
+						catch(Exception e) {
+							SendReduced.log("Error "+e);
+						}
+					}
+					c.close();
+				}
 			}
 			
+			SendReduced.log("Orig date "+origDate);
+			if (origName != null)
+				SendReduced.log("Name "+origName);
 			SendReduced.log("need to decode "+data.length+" bytes");
 
 			int o = getOrientation(cr, uri);
@@ -255,6 +325,51 @@ public class Utils {
 				bmp = Bitmap.createBitmap(inBmp, 0, 0, w, h, m, true);
 			else
 				bmp = inBmp;
+		}
+		
+		File createOutFile() throws IOException {
+			String mode = options.getString(Options.PREF_NAME, Options.OPT_NAME_RANDOM);
+			File outFile = null;
+			SendReduced.log(mode);
+
+			if (mode.equals(Options.OPT_NAME_SEQUENTIAL)) {
+				outFile = new File(curCacheDir + "/" + String.format("%04d.jpg", sequencePos));
+				sequencePos++;
+			}
+			else if (mode.equals(Options.OPT_NAME_DATE_TIME) && origDate > 0) {
+				String base = curCacheDir + "/" + new SimpleDateFormat("yyyyMMDDHHmmss").format(new Date(origDate));
+				File f = new File(base+".jpg");
+				if (! f.exists()) {
+					outFile = f;					
+				}
+				else {
+					for (int i = 2 ; i < 100000 ; i++) {
+						f = new File(base+"-"+i+".jpg");
+						if (! f.exists()) {
+							outFile = f;
+							break;
+						}
+					}
+				}
+			}
+			else if (mode.equals(Options.OPT_NAME_PRESERVE) && origName != null) {
+				if (origName.toLowerCase().endsWith(".jpg") || origName.toLowerCase().endsWith(".jpeg")) {
+					outFile = new File(curCacheDir + "/" + origName);
+				}
+				else {
+					outFile = new File(curCacheDir + "/" + origName + ".jpg");
+				}
+			}
+			
+			if (outFile != null) {
+				SendReduced.log("Trying "+outFile);
+				try {
+					if (outFile.createNewFile())
+						return outFile;
+				} catch (IOException e) {
+				}
+			}
+			return File.createTempFile(PREFIX, ".jpg", new File(curCacheDir));
 		}
 	}
 }

@@ -27,5 +27,11 @@
         <item>99</item>
         <item>100</item>
      </string-array>
+    <string-array name="outputs">
+        <item>date and time</item>
+        <item>preserve</item>
+        <item>random</item>
+        <item>sequential</item>
+    </string-array>
     
 </resources>
