@@ -11,7 +11,10 @@ public class Options extends PreferenceActivity {
 	public static final String OPT_NAME_RANDOM = "random";
 	public static final String OPT_NAME_SEQUENTIAL = "sequential";
 	public static final String PREF_SEQUENCE_POSITION = "sequencePosition";
-	public static final Object OPT_NAME_PRESERVE = "preserve";
+	public static final String OPT_NAME_PRESERVE = "preserve";
+	public static final String PREF_EXIF_LOCATION = "exifLocation";
+	public static final String PREF_EXIF_MAKE_MODEL = "exifMake";
+	public static final String PREF_EXIF_DATETIME = "exifDateTime";
 	
 	@Override
 	public void onCreate(Bundle icicle) {

@@ -10,7 +10,9 @@ import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -36,7 +38,7 @@ public class Utils {
 	static final int BUFSIZE = 16384;
 	static final int INVALID_ROTATION = -360000;
 	static final String PREFIX = "Image";
-	static final long CLEAN_TIME = (2 * 86400l * 1000l);
+	static final long CLEAN_TIME = (2 * 3600 * 1000l);
 	Activity activity;
 	ContentResolver cr;
 	SharedPreferences options;
@@ -77,7 +79,7 @@ public class Utils {
 		if (image.bmp == null)
 			return null;
 		SendReduced.log("Reduced to "+image.bmp.getWidth()+"x"+image.bmp.getHeight());
-		String path = saveImage(image);
+		String path = image.saveImage();
 		if (path == null) 
 			return null;
 		return Uri.fromFile(new File(path));		
@@ -108,27 +110,6 @@ public class Utils {
 		return storage;
 	}
 	
-	private String saveImage(ReducedImage ri) {
-//		File storage = getCacheDir(activity);
-		
-		try {
-			File temp = ri.createOutFile(); //File.createTempFile(PREFIX, ".jpg", storage);
-			SendReduced.log("Compressing to "+temp);
-			FileOutputStream out = new FileOutputStream(temp);
-			boolean status = ri.bmp.compress(Bitmap.CompressFormat.JPEG, outQuality, out);
-			out.close();
-			if (!status) {
-				temp.delete();
-				return null;
-			}
-			return temp.getPath();
-		} catch (IOException e) {
-			SendReduced.log("Error writing "+e);
-			return null;
-		}
-		
-	}
-	
 	public static void cleanCache(Context c, Long curTime) {		
 		SendReduced.log("cleanCache "+getCacheDir(c));
 		File[] dirs = getCacheDir(c).listFiles(new FileFilter(){
@@ -140,7 +121,6 @@ public class Utils {
 
 		// previous version files
 		for (File f : getCacheDir(c).listFiles()) {
-			SendReduced.log("checking "+f.getName());
 			if (f.getPath().toLowerCase().endsWith(".jpg"))
 				f.delete();
 		}
@@ -148,9 +128,10 @@ public class Utils {
 		for (File d : dirs) {
 			String n = d.getName();
 			try {
+				SendReduced.log("checking "+n);
 				long t = Long.parseLong(n.split("-")[0]);
-				if (t < curTime - CLEAN_TIME ||
-						curTime + CLEAN_TIME < t) {
+				SendReduced.log("parsed to "+t+" vs "+curTime);
+				if (Math.abs(t-curTime) >= CLEAN_TIME) {
 					SendReduced.log("cleaning up "+d.getPath());
 					for (File f : d.listFiles())
 						f.delete();
@@ -223,7 +204,7 @@ public class Utils {
 		if (image.bmp == null)
 			return null;
 		SendReduced.log("Reduced to "+image.bmp.getWidth()+"x"+image.bmp.getHeight());
-		String path = saveImage(image);
+		String path = image.saveImage();
 		if (path == null) 
 			return null;
 		else
@@ -234,8 +215,25 @@ public class Utils {
 		long origDate;
 		Bitmap bmp;
 		String origName;
+		private boolean preserveExifLocation;
+		private boolean preserveExifMake;
+		private boolean preserveExifDate;
+		private boolean haveExif;
+		private final String[] DATETIME_TAGS = { ExifInterface.TAG_DATETIME };
+		private final String[] LOCATION_TAGS = { ExifInterface.TAG_GPS_ALTITUDE, ExifInterface.TAG_GPS_ALTITUDE_REF,
+			ExifInterface.TAG_GPS_LATITUDE, ExifInterface.TAG_GPS_LATITUDE_REF, ExifInterface.TAG_GPS_LONGITUDE,
+			ExifInterface.TAG_GPS_LONGITUDE_REF, ExifInterface.TAG_GPS_PROCESSING_METHOD };
+		private final String[] MAKE_TAGS = { ExifInterface.TAG_MAKE, ExifInterface.TAG_MODEL };
+		private Map<String,String> exifLocation;
+		private Map<String,String> exifMake;
+		private Map<String,String> exifDate;
 		
 		public ReducedImage(Uri uri) {
+			preserveExifLocation = options.getBoolean(Options.PREF_EXIF_LOCATION, false);
+			preserveExifMake = options.getBoolean(Options.PREF_EXIF_MAKE_MODEL, false);
+			preserveExifDate = options.getBoolean(Options.PREF_EXIF_DATETIME, false);
+			haveExif = preserveExifLocation || preserveExifMake || preserveExifDate;
+
 			bmp = null;
 			
 			SendReduced.log("Reducing "+uri);
@@ -252,8 +250,11 @@ public class Utils {
 			
 			origDate = -1;
 			origName = null;
+			String origPath = null;
+			
 			if (uri.getScheme().equalsIgnoreCase("file")) {
-				File f = new File(uri.getPath());
+				origPath = uri.getPath();
+				File f = new File(origPath);
 				origDate = f.lastModified();
 				origName = f.getName();
 			}
@@ -263,8 +264,10 @@ public class Utils {
 					if (c.moveToFirst()) {
 						try {
 							int id = c.getColumnIndex(Images.Media.DATA);
-							if (id != -1) 
-								origName = new File(c.getString(id)).getName();
+							if (id != -1) {
+								origPath = c.getString(id);
+								origName = new File(origPath).getName();
+							}
 
 							id = c.getColumnIndex(Images.Media.DATE_ADDED);
 							if (id != -1) {
@@ -289,6 +292,22 @@ public class Utils {
 				SendReduced.log("Name "+origName);
 			SendReduced.log("need to decode "+data.length+" bytes");
 
+			if (origPath == null)
+				haveExif = false;
+			
+			if (haveExif) {
+				try {
+					ExifInterface ei = new ExifInterface(origPath);
+					if (preserveExifDate)
+						exifDate = getTags(ei, DATETIME_TAGS);
+					if (preserveExifLocation)
+						exifDate = getTags(ei, LOCATION_TAGS);
+					if (preserveExifMake)
+						exifDate = getTags(ei, MAKE_TAGS);
+				} catch (IOException e) {
+				}
+			}
+			
 			int o = getOrientation(cr, uri);
 			SendReduced.log("orientation = "+o);
 			
@@ -327,6 +346,25 @@ public class Utils {
 				bmp = inBmp;
 		}
 		
+		private Map<String, String> getTags(ExifInterface ei,
+				String[] tags) {
+			Map<String, String> map = new HashMap<String, String>();
+			for (String tag : tags)
+				map.put(tag, ei.getAttribute(tag));
+			return map;
+		}
+
+		private void setTags(ExifInterface ei,
+				Map<String, String> map) {
+			if (map == null)
+				return;
+			for (String tag : map.keySet()) {
+				String v = map.get(tag);
+				if (v != null)
+					ei.setAttribute(tag, map.get(tag));
+			}
+		}
+
 		File createOutFile() throws IOException {
 			String mode = options.getString(Options.PREF_NAME, Options.OPT_NAME_RANDOM);
 			File outFile = null;
@@ -373,5 +411,33 @@ public class Utils {
 			}
 			return File.createTempFile(PREFIX, ".jpg", new File(curCacheDir));
 		}
+
+		String saveImage() {
+			try {
+				File temp = createOutFile(); //File.createTempFile(PREFIX, ".jpg", storage);
+				SendReduced.log("Compressing to "+temp);
+				FileOutputStream out = new FileOutputStream(temp);
+				boolean status = bmp.compress(Bitmap.CompressFormat.JPEG, outQuality, out);
+				out.close();
+				if (!status) {
+					temp.delete();
+					return null;
+				}
+				if (haveExif) {
+					ExifInterface ei = new ExifInterface(temp.getPath());
+					setTags(ei, exifDate);
+					setTags(ei, exifLocation);
+					setTags(ei, exifMake);
+					ei.saveAttributes();
+				}
+				return temp.getPath();
+			} catch (IOException e) {
+				SendReduced.log("Error writing "+e);
+				return null;
+			}
+			
+		}
+		
+
 	}
 }

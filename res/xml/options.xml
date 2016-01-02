@@ -13,10 +13,29 @@
 	android:entryValues="@array/qualities"
 	android:key="quality"
 	android:defaultValue="85"/>
+<PreferenceCategory 
+    android:title="Output settings">
 <ListPreference
 	android:title="Output filename"
 	android:entries="@array/outputs"    	
 	android:entryValues="@array/outputs"
 	android:key="output"
 	android:defaultValue="random"/>
+<CheckBoxPreference
+    android:title="Include GPS location"
+    android:key="exifLocation"
+    android:defaultValue="false"/>
+<CheckBoxPreference
+    android:title="Include EXIF location data"
+    android:key="exifLocation"
+    android:defaultValue="false"/>
+<CheckBoxPreference
+    android:title="Include EXIF timestamp"
+    android:key="exifDateTime"
+    android:defaultValue="false"/>
+<CheckBoxPreference
+    android:title="Include EXIF model and make"
+    android:key="exifMake"
+    android:defaultValue="false"/>
+</PreferenceCategory>
 </PreferenceScreen>
