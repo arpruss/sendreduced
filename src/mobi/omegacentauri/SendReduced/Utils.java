@@ -268,12 +268,12 @@ public class Utils {
 
 							id = c.getColumnIndex(Images.Media.DATE_ADDED);
 							if (id != -1) {
-								origDate = c.getInt(id);
+								origDate = c.getLong(id)  * 1000;
 							}
 							else {
 								id = c.getColumnIndex(Images.Media.DATE_MODIFIED);
 								if (id != -1)
-									origDate = c.getInt(id);
+									origDate = c.getLong(id) * 1000;
 							}
 						}
 						catch(Exception e) {
@@ -337,7 +337,9 @@ public class Utils {
 				sequencePos++;
 			}
 			else if (mode.equals(Options.OPT_NAME_DATE_TIME) && origDate > 0) {
-				String base = curCacheDir + "/" + new SimpleDateFormat("yyyyMMDDHHmmss").format(new Date(origDate));
+				SendReduced.log("zz "+origDate);
+				Date d = new Date(origDate);
+				String base = curCacheDir + "/" + new SimpleDateFormat("yyyyMMDD_HHmmss").format(d);
 				File f = new File(base+".jpg");
 				if (! f.exists()) {
 					outFile = f;					
