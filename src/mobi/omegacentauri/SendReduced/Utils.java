@@ -14,6 +14,8 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -24,6 +26,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.util.Log;
 
 public class Utils {
 	static final int BUFSIZE = 16384;
@@ -36,6 +39,7 @@ public class Utils {
 	private int outResolution;
 	private int outQuality;
 	static final String MIME_TYPE = "image/jpeg"; //"text/plain";
+	public static final String INTENT_FROM_ME = "mobi.omegacentauri.SendReduced.INTENT_FROM_ME";
 	
 	public Utils(Activity a) {
 		activity = a;
@@ -61,23 +65,21 @@ public class Utils {
 		if (out == null)
 			return false;
 		Intent i = new Intent(android.content.Intent.ACTION_SEND);
-		i.setType(MIME_TYPE);
 		i.putExtra(android.content.Intent.EXTRA_STREAM, out);
+		i.setType(MIME_TYPE);
+		i.putExtra(Intent.EXTRA_TEXT, " ");
+		i.putExtra(INTENT_FROM_ME, true);
 		activity.startActivity(i);
 		return true;
 	}
 	
 	private static File getCacheDir(Context c) {
-		File storage = null;
-		
+		File storage;
 		if (Build.VERSION.SDK_INT >= 8)
 			storage = c.getExternalCacheDir();
-		
-		if (storage == null)
+		else
 			storage = new File(Environment.getExternalStorageDirectory().getPath()+"/SendReduced");
-		
 		storage.mkdir();
-		
 		return storage;
 	}
 	
@@ -123,20 +125,15 @@ public class Utils {
 	}
 
 	static private int getOrientation(ContentResolver cr, Uri uri) {
-		try {
-			Cursor c = 
-				android.provider.MediaStore.Images.Media.query(cr, uri, 
-						new String[]{MediaStore.Images.Media.ORIENTATION});
-			if (c == null)
-				return INVALID_ROTATION;
-			c.moveToFirst();
-			int o = c.getInt(c.getColumnIndex(MediaStore.Images.Media.ORIENTATION));
-			c.close();
-			return o;
-		}
-		catch(Exception e) {
+		Cursor c = 
+			android.provider.MediaStore.Images.Media.query(cr, uri, 
+					new String[]{MediaStore.Images.Media.ORIENTATION});
+		if (c == null)
 			return INVALID_ROTATION;
-		}
+		c.moveToFirst();
+		int o = c.getInt(c.getColumnIndex(MediaStore.Images.Media.ORIENTATION));
+		c.close();
+		return o;
 	}
 
 //	static private String getPath(ContentResolver cr, Uri uri) {

@@ -12,7 +12,7 @@
         <item>1280</item>
         <item>1536</item>
         <item>2048</item>
-        <item>3072</item>
+        <item>2560</item>
      </string-array>
     <string-array name="qualities">
         <item>60</item>
