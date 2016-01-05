@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -19,6 +20,10 @@ public class SendReduced extends Activity {
 	public static void log(String s) {
 		if (DEBUG )
 			Log.v("SendReduced", s);
+	}
+	
+	public static boolean pro(Context context) {
+		return context.getPackageName().toLowerCase().endsWith("pro");
 	}
 
 	/** Called when the activity is first created. */

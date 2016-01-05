@@ -13,8 +13,17 @@
 	android:entryValues="@array/qualities"
 	android:key="quality"
 	android:defaultValue="85"/>
+<PreferenceScreen 
+    android:title="Upgrade to Pro"
+    android:summary=""
+    android:key="upgrade"
+    />
+
 <PreferenceCategory 
-    android:title="Output settings">
+    android:key="outputPrivacy"
+    android:title="Output privacy settings"
+    >
+    
 <ListPreference
 	android:title="Output filename"
 	android:entries="@array/outputs"    	
@@ -38,4 +47,5 @@
     android:key="exifMake"
     android:defaultValue="false"/>
 </PreferenceCategory>
+
 </PreferenceScreen>
