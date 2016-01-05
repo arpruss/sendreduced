@@ -78,8 +78,10 @@ public class Options extends PreferenceActivity implements OnSharedPreferenceCha
 		PreferenceScreen upgrade = (PreferenceScreen) findPreference("upgrade");
 		if (SendReduced.pro(this)) {
 			getPreferenceScreen().removePreference(upgrade);
+			getPreferenceScreen().findPreference("outputPrivacy").setSummary("Choose which information to retain in the reduced file.");
 			return;
 		}
+		
 		Intent intent = new Intent(Intent.ACTION_VIEW);
     	intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     	if (MarketDetector.detect(this) == MarketDetector.APPSTORE) {
@@ -92,6 +94,7 @@ public class Options extends PreferenceActivity implements OnSharedPreferenceCha
       	}
     	
 		upgrade.setIntent(intent);
+		
 		
 		for (String p : proKeys) {
 			Preference pref = findPreference(p);

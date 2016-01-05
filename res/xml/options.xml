@@ -22,6 +22,7 @@
 <PreferenceCategory 
     android:key="outputPrivacy"
     android:title="Output privacy settings"
+    android:summary="By default, all file information is stripped from the photos. In the Pro version, you can include some of it." 
     >
     
 <ListPreference
