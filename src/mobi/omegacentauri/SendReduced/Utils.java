@@ -46,7 +46,7 @@ public class Utils {
 	private int outQuality;
 	private int sequencePos;
 	static final String MIME_TYPE = "image/jpeg"; //"text/plain";
-	public static final String INTENT_FROM_ME = "mobi.omegacentauri.SendReduced.INTENT_FROM_ME";
+	public static final String INTENT_FROM_ME = "mobi.omegacentauri.Send" + "Reduced.INTENT_FROM_ME";
 	private String curCacheDir;
 	private long curTime;
 	
@@ -144,9 +144,12 @@ public class Utils {
 	}
 
 	static private int getOrientation(ContentResolver cr, Uri uri) {
-		Cursor c = 
-			android.provider.MediaStore.Images.Media.query(cr, uri, 
-					new String[]{MediaStore.Images.Media.ORIENTATION});
+		Cursor c = null;
+		try {
+			c = android.provider.MediaStore.Images.Media.query(cr, uri, 
+						new String[]{MediaStore.Images.Media.ORIENTATION});
+		}
+		catch (Exception e) {}
 		if (c == null)
 			return INVALID_ROTATION;
 		c.moveToFirst();
@@ -266,31 +269,36 @@ public class Utils {
 				origName = f.getName();
 			}
 			else if (uri.getScheme().equalsIgnoreCase("content")) {
-				Cursor c = cr.query(uri, null, null, null, null);
-				if (c != null) {
-					if (c.moveToFirst()) {
-						try {
-							int id = c.getColumnIndex(Images.Media.DATA);
-							if (id != -1) {
-								origPath = c.getString(id);
-								origName = new File(origPath).getName();
+				try {
+					Cursor c = cr.query(uri, null, null, null, null);
+					if (c != null) {
+						if (c.moveToFirst()) {
+							try {
+								int id = c.getColumnIndex(Images.Media.DATA);
+								if (id != -1) {
+									origPath = c.getString(id);
+									origName = new File(origPath).getName();
+								}
+	
+								id = c.getColumnIndex(Images.Media.DATE_ADDED);
+								if (id != -1) {
+									origDate = c.getLong(id)  * 1000;
+								}
+								else {
+									id = c.getColumnIndex(Images.Media.DATE_MODIFIED);
+									if (id != -1)
+										origDate = c.getLong(id) * 1000;
+								}
 							}
-
-							id = c.getColumnIndex(Images.Media.DATE_ADDED);
-							if (id != -1) {
-								origDate = c.getLong(id)  * 1000;
-							}
-							else {
-								id = c.getColumnIndex(Images.Media.DATE_MODIFIED);
-								if (id != -1)
-									origDate = c.getLong(id) * 1000;
+							catch(Exception e) {
+								SendReduced.log("Error "+e);
 							}
 						}
-						catch(Exception e) {
-							SendReduced.log("Error "+e);
-						}
+						c.close();
 					}
-					c.close();
+				}
+				catch(Exception e) {					
+					SendReduced.log("Error "+e);
 				}
 			}
 			
@@ -349,8 +357,10 @@ public class Utils {
 					
 			SendReduced.log("image: "+w+"x"+h+" ["+o+"]");
 
-			if (transform)
+			if (transform) {
 				bmp = Bitmap.createBitmap(inBmp, 0, 0, w, h, m, true);
+				inBmp.recycle();
+			}
 			else
 				bmp = inBmp;
 		}
@@ -444,6 +454,9 @@ public class Utils {
 			} catch (IOException e) {
 				SendReduced.log("Error writing "+e);
 				return null;
+			}
+			finally {
+				bmp.recycle();
 			}
 			
 		}
