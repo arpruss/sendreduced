@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">Send Reduced</string>
     <string-array name="resolutions">
         <item>256</item>
         <item>512</item>

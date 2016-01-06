@@ -15,14 +15,13 @@
 	android:defaultValue="85"/>
 <PreferenceScreen 
     android:title="Upgrade to Pro"
-    android:summary=""
+    android:summary="By default, all file information is stripped from the photos. In the Pro version, you can choose to include some of it." 
     android:key="upgrade"
     />
 
 <PreferenceCategory 
     android:key="outputPrivacy"
     android:title="Output privacy settings"
-    android:summary="By default, all file information is stripped from the photos. In the Pro version, you can include some of it." 
     >
     
 <ListPreference
@@ -44,8 +43,12 @@
     android:key="exifDateTime"
     android:defaultValue="false"/>
 <CheckBoxPreference
-    android:title="Include EXIF model and make"
+    android:title="Include EXIF device info"
     android:key="exifMake"
+    android:defaultValue="false"/>
+<CheckBoxPreference
+    android:title="Include EXIF Camera settings"
+    android:key="exifSettings"
     android:defaultValue="false"/>
 </PreferenceCategory>
 

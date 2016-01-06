@@ -14,7 +14,10 @@
    inkscape:version="0.48.4 r9939"
    width="512"
    height="512"
-   sodipodi:docname="Lens_and_wavefrontsfree.svg">
+   sodipodi:docname="Lens_and_wavefrontsfree.svg"
+   inkscape:export-filename="C:\android\sendreduced\Lens_and_wavefrontsfree.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <metadata
      id="metadata2991">
     <rdf:RDF>
@@ -209,14 +212,14 @@
      sodipodi:nodetypes="ccccc" />
   <text
      xml:space="preserve"
-     style="font-size:48.08280563000000300px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:127.99999714000000000%;letter-spacing:0px;word-spacing:0px;fill:#0000ff;fill-opacity:1;stroke:none;font-family:AR DESTINE;-inkscape-font-specification:AR DESTINE"
-     x="287.49484"
-     y="482.45917"
+     style="font-size:50.35609436px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:127.99999714%;letter-spacing:0px;word-spacing:0px;fill:#ffff00;fill-opacity:1;stroke:none;font-family:AR DESTINE;-inkscape-font-specification:AR DESTINE"
+     x="282.47141"
+     y="483.76099"
      id="text3834"
      sodipodi:linespacing="128%"><tspan
        sodipodi:role="line"
        id="tspan3836"
-       x="287.49484"
-       y="482.45917"
-       style="font-size:76.93248749000000000px;font-style:oblique;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:127.99999714000000000%;fill:#0000ff;font-family:Arial;-inkscape-font-specification:Arial Bold Oblique">FREE</tspan></text>
+       x="282.47141"
+       y="483.76099"
+       style="font-size:80.56974791999999800px;font-style:oblique;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:127.99999713999999000%;fill:#ffff00;font-family:Arial;-inkscape-font-specification:Arial Bold Oblique">FREE</tspan></text>
 </svg>

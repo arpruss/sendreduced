@@ -13,16 +13,16 @@
 
     <application
         android:icon="@drawable/icon"
-        android:label="@string/app_name" >
+        android:label="Send Reduced Free" >
         <activity
             android:name="mobi.omegacentauri.SendReduced.SendReduced"
             android:label="Send Reduced Free" >
-            <intent-filter android:label="@string/app_name">
+            <intent-filter android:label="Send Reduced Free">
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />  
             </intent-filter>            
-            <intent-filter android:label="@string/app_name">
+            <intent-filter android:label="Send Reduced Free">
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="image/*" />  
@@ -47,7 +47,7 @@
                 </intent-filter>  
              </activity>
         		<activity android:name="mobi.omegacentauri.SendReduced.Options" 
-		    android:label="@string/app_name"> 
+		    android:label="Send Reduced Free"> 
              <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

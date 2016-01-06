@@ -1,5 +1,7 @@
 package mobi.omegacentauri.SendReduced;
 
+import java.util.Arrays;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -10,6 +12,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.preference.PreferenceScreen;
+import android.widget.Toast;
 
 public class Options extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	public static final String PREF_RESOLUTION = "resolution";
@@ -22,6 +25,7 @@ public class Options extends PreferenceActivity implements OnSharedPreferenceCha
 	public static final String PREF_EXIF_LOCATION = "exifLocation";
 	public static final String PREF_EXIF_MAKE_MODEL = "exifMake";
 	public static final String PREF_EXIF_DATETIME = "exifDateTime";
+	public static final String PREF_EXIF_SETTINGS = "exifSettings";
 	
 	public static final String[] proKeys = { PREF_NAME, PREF_EXIF_LOCATION, PREF_EXIF_MAKE_MODEL, PREF_EXIF_DATETIME, "outputPrivacy" };
 	
@@ -59,6 +63,9 @@ public class Options extends PreferenceActivity implements OnSharedPreferenceCha
 
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences options, String key) {
+		if (! SendReduced.pro(this) && Arrays.asList(proKeys).contains(key)) {
+			Toast.makeText(this, "This setting only works in the Pro version", Toast.LENGTH_LONG).show();
+		}
 		setSummary(key);
 	}
 
@@ -78,7 +85,6 @@ public class Options extends PreferenceActivity implements OnSharedPreferenceCha
 		PreferenceScreen upgrade = (PreferenceScreen) findPreference("upgrade");
 		if (SendReduced.pro(this)) {
 			getPreferenceScreen().removePreference(upgrade);
-			getPreferenceScreen().findPreference("outputPrivacy").setSummary("Choose which information to retain in the reduced file.");
 			return;
 		}
 		

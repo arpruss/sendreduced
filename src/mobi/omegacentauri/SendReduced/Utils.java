@@ -218,21 +218,28 @@ public class Utils {
 		private boolean preserveExifLocation;
 		private boolean preserveExifMake;
 		private boolean preserveExifDate;
+		private boolean preserveExifSettings;
 		private boolean haveExif;
-		private final String[] DATETIME_TAGS = { ExifInterface.TAG_DATETIME };
+		private final String[] DATETIME_TAGS = { ExifInterface.TAG_DATETIME }; // TODO? GPS Time? No: That might give location away
 		private final String[] LOCATION_TAGS = { ExifInterface.TAG_GPS_ALTITUDE, ExifInterface.TAG_GPS_ALTITUDE_REF,
 			ExifInterface.TAG_GPS_LATITUDE, ExifInterface.TAG_GPS_LATITUDE_REF, ExifInterface.TAG_GPS_LONGITUDE,
 			ExifInterface.TAG_GPS_LONGITUDE_REF, ExifInterface.TAG_GPS_PROCESSING_METHOD };
 		private final String[] MAKE_TAGS = { ExifInterface.TAG_MAKE, ExifInterface.TAG_MODEL };
+		private final String[] SETTINGS_TAGS = { ExifInterface.TAG_APERTURE, ExifInterface.TAG_EXPOSURE_TIME, ExifInterface.TAG_FLASH, ExifInterface.TAG_FOCAL_LENGTH, 
+				ExifInterface.TAG_ISO, ExifInterface.TAG_WHITE_BALANCE };
+		
 		private Map<String,String> exifLocation;
 		private Map<String,String> exifMake;
 		private Map<String,String> exifDate;
+		private Map<String,String> exifSettings;
 		
 		public ReducedImage(Uri uri) {
 			preserveExifLocation = options.getBoolean(Options.PREF_EXIF_LOCATION, false);
 			preserveExifMake = options.getBoolean(Options.PREF_EXIF_MAKE_MODEL, false);
 			preserveExifDate = options.getBoolean(Options.PREF_EXIF_DATETIME, false);
-			haveExif = preserveExifLocation || preserveExifMake || preserveExifDate;
+			preserveExifSettings = options.getBoolean(Options.PREF_EXIF_SETTINGS, false);
+			haveExif = SendReduced.pro(activity) && ( preserveExifLocation || preserveExifMake || 
+					preserveExifDate || preserveExifSettings );
 
 			bmp = null;
 			
@@ -303,7 +310,9 @@ public class Utils {
 					if (preserveExifLocation)
 						exifDate = getTags(ei, LOCATION_TAGS);
 					if (preserveExifMake)
-						exifDate = getTags(ei, MAKE_TAGS);
+						exifMake = getTags(ei, MAKE_TAGS);
+					if (preserveExifSettings)
+						exifSettings = getTags(ei, SETTINGS_TAGS);
 				} catch (IOException e) {
 				}
 			}
@@ -428,6 +437,7 @@ public class Utils {
 					setTags(ei, exifDate);
 					setTags(ei, exifLocation);
 					setTags(ei, exifMake);
+					setTags(ei, exifSettings);
 					ei.saveAttributes();
 				}
 				return temp.getPath();
