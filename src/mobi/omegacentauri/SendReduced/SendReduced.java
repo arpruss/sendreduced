@@ -1,5 +1,8 @@
 package mobi.omegacentauri.SendReduced;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.Thread.UncaughtExceptionHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -30,6 +33,9 @@ public class SendReduced extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		if (DEBUG)
+			crashLogHandler();
 
 		SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(this);
 
@@ -77,5 +83,29 @@ public class SendReduced extends Activity {
 		else {
 			finish();
 		}
+//		String alpha;
+//		alpha = null;
+//		Log.v("",""+alpha.length());
+		
+	}
+
+	private void crashLogHandler() {
+		if(!(Thread.getDefaultUncaughtExceptionHandler() instanceof MyCrashHandler)) 
+		    Thread.setDefaultUncaughtExceptionHandler(new MyCrashHandler());
+	}
+		
+	class MyCrashHandler implements UncaughtExceptionHandler {
+
+		@Override
+		public void uncaughtException(Thread thread, Throwable ex) {
+			Intent i = new Intent(Intent.ACTION_SEND);
+			i.putExtra(Intent.EXTRA_SUBJECT, "crash report for "+getPackageName());
+			i.putExtra(Intent.EXTRA_EMAIL, new String[] {"arpruss@gmail.com"} );
+			StringWriter tw = new StringWriter();
+			ex.printStackTrace(new PrintWriter(tw));
+			i.putExtra(Intent.EXTRA_TEXT, ex.getMessage()+"\n"+tw.toString());
+			i.setType("message/rfc822");
+			startActivity(i);
+		}		
 	}
 }

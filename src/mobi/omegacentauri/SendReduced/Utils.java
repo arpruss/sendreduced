@@ -359,10 +359,12 @@ public class Utils {
 
 			if (transform) {
 				bmp = Bitmap.createBitmap(inBmp, 0, 0, w, h, m, true);
-				inBmp.recycle();
+				if (bmp != inBmp)
+					inBmp.recycle();
 			}
-			else
+			else {
 				bmp = inBmp;
+			}
 		}
 		
 		private Map<String, String> getTags(ExifInterface ei,
