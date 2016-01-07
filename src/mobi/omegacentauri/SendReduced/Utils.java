@@ -94,8 +94,16 @@ public class Utils {
 		i.setType(MIME_TYPE);
 		i.putExtra(Intent.EXTRA_TEXT, " ");
 		i.putExtra(INTENT_FROM_ME, true);
-		activity.startActivity(i);
+		startWithChooser(activity, i);
 		return true;
+	}
+	
+	static void startWithChooser(Activity activity, Intent i) {
+		startWithChooser(activity, i, "Share reduced photo via");
+	}
+	
+	private static void startWithChooser(Activity activity, Intent i, String title) {
+		activity.startActivity(Intent.createChooser(i, title));
 	}
 	
 	private static File getCacheDir(Context c) {

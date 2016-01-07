@@ -14,6 +14,11 @@
 	android:key="quality"
 	android:defaultValue="85"/>
 <PreferenceScreen 
+    android:title="How to use"
+    android:summary="Just choose Send Reduced when sharing your photo, and you'll be asked which app to send it with after reduction. You can also attach photos to emails or texts by choosing Send Reduced." 
+    android:key="howto"
+    />
+<PreferenceScreen 
     android:title="Upgrade to Pro"
     android:summary="By default, all file information is stripped from the photos. In the Pro version, you can choose to include some of it." 
     android:key="upgrade"
