@@ -18,10 +18,10 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class SendReduced extends Activity {
-	private static boolean DEBUG = false;
+	static boolean DEBUG = true;
 
 	public static void log(String s) {
-		if (DEBUG )
+		if (DEBUG)
 			Log.v("SendReduced", s);
 	}
 	
@@ -76,8 +76,10 @@ public class SendReduced extends Activity {
 					Intent go = new Intent(android.content.Intent.ACTION_SEND_MULTIPLE);
 					go.setType("text/plain");
 					go.putParcelableArrayListExtra(android.content.Intent.EXTRA_STREAM, out);
-					Utils.startWithChooser(this, go);
-					startActivity(go);
+					Uri[] grant = new Uri[out.size()];
+					out.toArray(grant);
+					Utils.startWithChooser(this, grant, go);
+//					startActivity(go);
 				}
 			}
 		}

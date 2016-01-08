@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -26,6 +27,7 @@ public class Options extends PreferenceActivity implements OnSharedPreferenceCha
 	public static final String PREF_EXIF_MAKE_MODEL = "exifMake";
 	public static final String PREF_EXIF_DATETIME = "exifDateTime";
 	public static final String PREF_EXIF_SETTINGS = "exifSettings";
+	public static final String PREF_CONTENT_PROVIDER = "contentProvider";
 	
 	public static final String[] proKeys = { PREF_NAME, PREF_EXIF_LOCATION, PREF_EXIF_MAKE_MODEL, PREF_EXIF_DATETIME, "outputPrivacy" };
 	
@@ -82,42 +84,49 @@ public class Options extends PreferenceActivity implements OnSharedPreferenceCha
 			setSummary(i);
 		}
 
+		if (Build.VERSION.SDK_INT < 23 && ! SendReduced.DEBUG) {
+			Preference pref = findPreference(PREF_CONTENT_PROVIDER);
+			if (pref != null)
+				getPreferenceScreen().removePreference(pref);
+		}
+		
 		PreferenceScreen upgrade = (PreferenceScreen) findPreference("upgrade");
 		if (SendReduced.pro(this)) {
-			getPreferenceScreen().removePreference(upgrade);
-			return;
+			if (upgrade != null)
+				getPreferenceScreen().removePreference(upgrade);
 		}
-		
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-    	intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    	if (MarketDetector.detect(this) == MarketDetector.APPSTORE) {
-            // string split up to fool switcher.sh
-      		intent.setData(Uri.parse("http://www.amazon.com/gp/mas/dl/android?p=mobi.omegacentauri.Send"+"Reduced_"+"pro"));
-      	}
-      	else {
-            // string split up to fool switcher.sh
-      		intent.setData(Uri.parse("market://details?id=mobi.omegacentauri.Send" +"Reduced_"+"pro"));
-      	}
-    	
-		upgrade.setIntent(intent);
-		
-		
-		for (String p : proKeys) {
-			Preference pref = findPreference(p);
-			if (pref != null) {
-				String title = pref.getTitle().toString();
-				if (! title.endsWith("[pro]")) 
-					pref.setTitle(title + " [pro]");
+		else {
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+	    	intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+	    	if (MarketDetector.detect(this) == MarketDetector.APPSTORE) {
+	            // string split up to fool switcher.sh
+	      		intent.setData(Uri.parse("http://www.amazon.com/gp/mas/dl/android?p=mobi.omegacentauri.Send"+"Reduced_"+"pro"));
+	      	}
+	      	else {
+	            // string split up to fool switcher.sh
+	      		intent.setData(Uri.parse("market://details?id=mobi.omegacentauri.Send" +"Reduced_"+"pro"));
+	      	}
+	    	
+			if (upgrade != null)
+				upgrade.setIntent(intent);		
+			
+			for (String p : proKeys) {
+				Preference pref = findPreference(p);
+				if (pref != null) {
+					String title = pref.getTitle().toString();
+					if (! title.endsWith("[pro]")) 
+						pref.setTitle(title + " [pro]");
+				}
 			}
-		}
-
-		PreferenceScreen ps = getPreferenceScreen();
-		int n = ps.getPreferenceCount();
-		for (int i = 0 ; i < n ; i++) {
-			Preference p = ps.getPreference(i);
-			String title = p.getTitle().toString();
-			if (title != null && title.contains(" [pro]")) {
-				p.setTitle(title.replace(" [pro]", ""));
+	
+			PreferenceScreen ps = getPreferenceScreen();
+			int n = ps.getPreferenceCount();
+			for (int i = 0 ; i < n ; i++) {
+				Preference p = ps.getPreference(i);
+				String title = p.getTitle().toString();
+				if (title != null && title.contains(" [pro]")) {
+					p.setTitle(title.replace(" [pro]", ""));
+				}
 			}
 		}
 	}

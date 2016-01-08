@@ -1,59 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="mobi.omegacentauri.SendReduced"
-    android:versionCode="1000"
-    android:versionName="0.10" >
+    android:versionCode="1100"
+    android:versionName="0.11" >
 
-    <uses-sdk android:minSdkVersion="5" android:targetSdkVersion="21" />
-     <supports-screens
-         android:normalScreens="true"
-         android:largeScreens="true"
-         android:xlargeScreens="true"/>
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-sdk
+        android:minSdkVersion="5"
+        android:targetSdkVersion="21" />
+
+    <supports-screens
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:xlargeScreens="true" />
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:icon="@drawable/icon"
         android:label="Send Reduced Free" >
         <activity
             android:name="mobi.omegacentauri.SendReduced.SendReduced"
-            android:label="Send Reduced Free" >
-            <intent-filter android:label="Send Reduced Free">
+            android:label="Send Reduced Free" 
+            android:noHistory="true"
+            >
+            <intent-filter android:label="Send Reduced Free" >
                 <action android:name="android.intent.action.SEND" />
+
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />  
-            </intent-filter>            
-            <intent-filter android:label="Send Reduced Free">
+
+                <data android:mimeType="image/*" />
+            </intent-filter>
+            <intent-filter android:label="Send Reduced Free" >
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
+
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:mimeType="image/*" />  
-            </intent-filter>            
-            </activity>
+
+                <data android:mimeType="image/*" />
+            </intent-filter>
+        </activity>
         <activity
             android:name="mobi.omegacentauri.SendReduced.GetReduced"
             android:label="Get Reduced Photo" >
-        
-             <intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.OPENABLE" />
-				<data android:mimeType="vnd.android.cursor.dir/image" />
+
+                <data android:mimeType="vnd.android.cursor.dir/image" />
                 <data android:mimeType="image/*" />
-                </intent-filter>  
-             <intent-filter>
+            </intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.PICK" />
+
                 <category android:name="android.intent.category.DEFAULT" />
-				<data android:mimeType="vnd.android.cursor.dir/image" />
+
+                <data android:mimeType="vnd.android.cursor.dir/image" />
                 <data android:mimeType="image/*" />
-                </intent-filter>  
-             </activity>
-        		<activity android:name="mobi.omegacentauri.SendReduced.Options" 
-		    android:label="Send Reduced Free"> 
-             <intent-filter>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="mobi.omegacentauri.SendReduced.Options"
+            android:label="Send Reduced Free" >
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            </activity>  
-		    
-		    />
-</application>
+        </activity>
+
+                <activity android:name="ShowLicense"
+                              
+                android:label="View license">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="mobi.omegacentauri.SendReduced.LICENSE"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        
+        <provider
+            android:name="mobi.omegacentauri.SendReduced.FileProvider"
+            android:authorities="mobi.omegacentauri.SendReduced"
+            android:exported="false"
+            android:grantUriPermissions="true" >
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/paths" />
+        </provider>
+    </application>
+
 </manifest>

@@ -82,7 +82,10 @@ public class Utils {
 		String path = image.saveImage();
 		if (path == null) 
 			return null;
-		return Uri.fromFile(new File(path));		
+		if (fileProvider())
+			return FileProvider.getUriForFile(activity, activity.getPackageName(), new File(path));
+		else
+			return Uri.fromFile(new File(path));		
 	}
 	
 	public boolean sendReduced(Uri uri) {
@@ -93,28 +96,43 @@ public class Utils {
 		i.putExtra(android.content.Intent.EXTRA_STREAM, out);
 		i.setType(MIME_TYPE);
 		i.putExtra(Intent.EXTRA_TEXT, " ");
-		i.putExtra(INTENT_FROM_ME, true);
-		startWithChooser(activity, i);
+		startWithChooser(activity, new Uri[] { uri }, i);
 		return true;
 	}
 	
-	static void startWithChooser(Activity activity, Intent i) {
-		startWithChooser(activity, i, "Share reduced photo via");
+	static void startWithChooser(Activity activity, Uri[] grant, Intent i) {
+		startWithChooser(activity, grant, i, "Share reduced photo via");
 	}
 	
-	private static void startWithChooser(Activity activity, Intent i, String title) {
+	private static void startWithChooser(Activity activity, Uri[] grant, Intent i, String title) {
+		i.putExtra(INTENT_FROM_ME, true);
+		i.setFlags(PackageManager.MATCH_DEFAULT_ONLY);
+		if (grant != null) {
+			List<ResolveInfo> possibles = activity.getPackageManager().queryIntentActivities(i, PackageManager.MATCH_DEFAULT_ONLY);
+			for (ResolveInfo r : possibles) {
+			    for (Uri uri : grant)
+			    	activity.grantUriPermission(r.activityInfo.packageName, uri, 
+			    			Intent.FLAG_GRANT_READ_URI_PERMISSION);
+			}
+		}
 		activity.startActivity(Intent.createChooser(i, title));
+	}
+	
+	public boolean fileProvider() {
+		Boolean f = (SendReduced.DEBUG || Build.VERSION.SDK_INT >= 23) && options.getBoolean(Options.PREF_CONTENT_PROVIDER, false);
+		SendReduced.log("Using file provider? " + f);
+		return f;
 	}
 	
 	private static File getCacheDir(Context c) {
 		File storage;
-		
+
 		if (Build.VERSION.SDK_INT >= 8)
 			storage = c.getExternalCacheDir();
 		else
 			storage = new File(Environment.getExternalStorageDirectory().getPath()+"/SendReduced");
 		
-		storage.mkdir();
+		storage.mkdirs();
 		return storage;
 	}
 	
@@ -218,6 +236,8 @@ public class Utils {
 		String path = image.saveImage();
 		if (path == null) 
 			return null;
+		else if (fileProvider())
+			return FileProvider.getUriForFile(activity, activity.getPackageName(), new File(path));
 		else
 			return Uri.fromFile(new File(path));
 	}
@@ -444,6 +464,7 @@ public class Utils {
 		String saveImage() {
 			try {
 				File temp = createOutFile(); //File.createTempFile(PREFIX, ".jpg", storage);
+				temp.setReadable(true, false);
 				SendReduced.log("Compressing to "+temp);
 				FileOutputStream out = new FileOutputStream(temp);
 				boolean status = bmp.compress(Bitmap.CompressFormat.JPEG, outQuality, out);

@@ -37,17 +37,23 @@ public class GetReduced extends Activity {
 
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		SendReduced.log("Codes "+requestCode+" "+resultCode);
 		if (requestCode != REQUEST_LOAD_IMAGE || 
 				resultCode != RESULT_OK ||
 				data == null) {
 			setResult(RESULT_CANCELED);
 		}
 		else {
-			Uri uri = new Utils(this).offerReduced(data.getData());
+			Utils utils = new Utils(this);
+			Uri uri = utils.offerReduced(data.getData());
 			if (uri == null)
 				setResult(RESULT_CANCELED);
-			else
-				setResult(RESULT_OK, new Intent().setData(uri));
+			else {
+				Intent i = new Intent().setData(uri);
+				SendReduced.log("Passing "+uri);
+				i.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+				setResult(RESULT_OK, i);
+			}
 		}
 		finish();
 	}

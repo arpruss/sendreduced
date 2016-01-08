@@ -13,6 +13,11 @@
 	android:entryValues="@array/qualities"
 	android:key="quality"
 	android:defaultValue="85"/>
+<CheckBoxPreference 
+    android:title="Use content provider"
+    android:key="contentProvider"
+    android:defaultValue="false"
+    android:summary="GMail on Android 6 needs you to either check this or go to Settings&#8594;Apps&#8594;Gmail&#8594;Permissions and enable the 'Storage' permission manually. This may reduce compatibility with some other apps."/>
 <PreferenceScreen 
     android:title="How to use"
     android:summary="Just choose Send Reduced when sharing your photo, and you'll be asked which app to send it with after reduction. You can also attach photos to emails or texts by choosing Send Reduced." 
@@ -57,4 +62,10 @@
     android:defaultValue="false"/>
 </PreferenceCategory>
 
+  <PreferenceCategory android:title="Licenses and copyrights">
+    <PreferenceScreen
+            android:title="View information">
+        <intent android:action="mobi.omegacentauri.SendReduced.LICENSE"/>
+        </PreferenceScreen>
+        </PreferenceCategory> 
 </PreferenceScreen>
