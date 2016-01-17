@@ -30,8 +30,7 @@ public class GetReduced extends Activity {
 				i.getAction().equals(Intent.ACTION_PICK)) {
 			Intent pick = new Intent(Intent.ACTION_PICK,
 					android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-			pick.putExtra(Utils.INTENT_FROM_ME, true);
-			startActivityForResult(Intent.createChooser(pick, "Choose source for photo to reduce"), REQUEST_LOAD_IMAGE);					
+			Utils.startActivityForResultWithChooser(this, pick, "Choose source for photo to reduce", REQUEST_LOAD_IMAGE);					
 		}
 	}
 

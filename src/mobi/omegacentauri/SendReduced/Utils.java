@@ -100,6 +100,12 @@ public class Utils {
 		return true;
 	}
 	
+	static void startActivityForResultWithChooser(Activity activity, Intent i, String title, int code) {
+		i.putExtra(Utils.INTENT_FROM_ME, true);
+		//activity.startActivityForResult(Intent.createChooser(i, title), code);
+		activity.startActivityForResult(i, code);
+	}
+	
 	static void startWithChooser(Activity activity, Uri[] grant, Intent i) {
 		startWithChooser(activity, grant, i, "Share reduced photo via");
 	}
@@ -115,7 +121,9 @@ public class Utils {
 			    			Intent.FLAG_GRANT_READ_URI_PERMISSION);
 			}
 		}
-		activity.startActivity(Intent.createChooser(i, title));
+
+		// activity.startActivity(Intent.createChooser(i, title));
+		activity.startActivity(i);
 	}
 	
 	public boolean fileProvider() {
@@ -159,8 +167,12 @@ public class Utils {
 				SendReduced.log("parsed to "+t+" vs "+curTime);
 				if (Math.abs(t-curTime) >= CLEAN_TIME) {
 					SendReduced.log("cleaning up "+d.getPath());
-					for (File f : d.listFiles())
+					for (File f : d.listFiles()) {
 						f.delete();
+						try {
+							c.revokeUriPermission(FileProvider.getUriForFile(c, c.getPackageName(), f), Intent.FLAG_GRANT_READ_URI_PERMISSION);
+						} catch(Exception e) {}
+					}
 					d.delete();
 				}
 			}

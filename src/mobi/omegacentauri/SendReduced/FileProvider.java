@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+s * Copyright (C) 2013 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -331,7 +331,7 @@ public class FileProvider extends ContentProvider {
             throw new SecurityException("Provider must not be exported");
         }
         if (!info.grantUriPermissions) {
-            throw new SecurityException("Provider must grant uri permissions");
+            throw new SecurityException("Provider must grant uri permissions (oops)");
         }
         mStrategy = getPathStrategy(context, info.authority);
     }
@@ -487,6 +487,7 @@ public class FileProvider extends ContentProvider {
     @Override
     public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
         // ContentProvider has already checked granted permissions
+    	SendReduced.log("openFile "+uri);
         final File file = mStrategy.getFileForUri(uri);
         final int fileMode = modeToMode(mode);
         return ParcelFileDescriptor.open(file, fileMode);
