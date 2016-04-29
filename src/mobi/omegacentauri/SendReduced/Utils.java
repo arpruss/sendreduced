@@ -95,7 +95,8 @@ public class Utils {
 		Intent i = new Intent(android.content.Intent.ACTION_SEND);
 		i.putExtra(android.content.Intent.EXTRA_STREAM, out);
 		i.setType(MIME_TYPE);
-		i.putExtra(Intent.EXTRA_TEXT, " ");
+//		i.putExtra(Intent.EXTRA_TEXT, " ");
+		SendReduced.log("uri "+uri);
 		startWithChooser(activity, new Uri[] { uri }, i);
 		return true;
 	}
