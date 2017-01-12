@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="mobi.omegacentauri.SendReduced"
-    android:versionCode="1300"
-    android:versionName="0.13" >
+    package="mobi.omegacentauri.SendReduced_pro"
+    android:versionCode="1600"
+    android:versionName="0.16" >
 
     <uses-sdk
         android:minSdkVersion="5"
@@ -17,20 +17,20 @@
 
     <application
         android:icon="@drawable/icon"
-        android:label="Send Reduced Free" >
+        android:label="Send Reduced Pro" >
         <activity
-            android:name="mobi.omegacentauri.SendReduced.SendReduced"
-            android:label="Send Reduced Free" 
+            android:name="mobi.omegacentauri.SendReduced_pro.SendReduced"
+            android:label="Send Reduced Pro" 
             android:noHistory="true"
             >
-            <intent-filter android:label="Send Reduced Free" >
+            <intent-filter android:label="Send Reduced Pro" >
                 <action android:name="android.intent.action.SEND" />
 
                 <category android:name="android.intent.category.DEFAULT" />
 
                 <data android:mimeType="image/*" />
             </intent-filter>
-            <intent-filter android:label="Send Reduced Free" >
+            <intent-filter android:label="Send Reduced Pro" >
                 <action android:name="android.intent.action.SEND_MULTIPLE" />
 
                 <category android:name="android.intent.category.DEFAULT" />
@@ -39,7 +39,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="mobi.omegacentauri.SendReduced.GetReduced"
+            android:name="mobi.omegacentauri.SendReduced_pro.GetReduced"
             android:label="Get Reduced Photo" >
             <intent-filter>
                 <action android:name="android.intent.action.GET_CONTENT" />
@@ -60,8 +60,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="mobi.omegacentauri.SendReduced.Options"
-            android:label="Send Reduced Free" >
+            android:name="mobi.omegacentauri.SendReduced_pro.Options"
+            android:label="Send Reduced Pro" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -74,14 +74,14 @@
                 android:label="View license">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-                <action android:name="mobi.omegacentauri.SendReduced.LICENSE"/>
+                <action android:name="mobi.omegacentauri.SendReduced_pro.LICENSE"/>
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
         
         <provider
-            android:name="mobi.omegacentauri.SendReduced.FileProvider"
-            android:authorities="mobi.omegacentauri.SendReduced"
+            android:name="mobi.omegacentauri.SendReduced_pro.FileProvider"
+            android:authorities="mobi.omegacentauri.SendReduced_pro"
             android:exported="false"
             android:grantUriPermissions="true" >
             <meta-data
