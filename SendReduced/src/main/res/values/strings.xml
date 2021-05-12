@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appName">Send Reduced</string>
+    <string-array name="resolutions">
+        <item>256</item>
+        <item>512</item>
+        <item>640</item>
+        <item>800</item>
+        <item>1024</item>
+        <item>1152</item>
+        <item>1280</item>
+        <item>1536</item>
+        <item>2048</item>
+        <item>2560</item>
+     </string-array>
+    <string-array name="qualities">
+        <item>60</item>
+        <item>70</item>
+        <item>75</item>
+        <item>80</item>
+        <item>85</item>
+        <item>90</item>
+        <item>95</item>
+        <item>97</item>
+        <item>98</item>
+        <item>99</item>
+        <item>100</item>
+     </string-array>
+    <string-array name="outputs">
+        <item>date and time</item>
+        <item>preserve</item>
+        <item>random</item>
+        <item>sequential</item>
+    </string-array>
+    
+</resources>

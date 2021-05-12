@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+<ListPreference
+	android:title="Maximum resolution"
+	android:entries="@array/resolutions"    	
+	android:entryValues="@array/resolutions"
+	android:key="resolution"
+	android:defaultValue="1024"/>
+<ListPreference
+	android:title="JPEG quality"
+	android:entries="@array/qualities"    	
+	android:entryValues="@array/qualities"
+	android:key="quality"
+	android:defaultValue="85"/>
+<CheckBoxPreference
+    android:title="Can save destination"
+    android:key="allowSave"
+    android:defaultValue="false"
+    android:summary="If you always share to the same destination app, check this box and you can set it next time you share. To unset, go to Settings>Apps, choose your destination app and clear its defaults."/>
+<CheckBoxPreference 
+    android:title="Use content provider"
+    android:key="contentProvider2"
+    android:defaultValue="true"
+    android:summary="On some older devices, unchecking this will provide better compatibility with some apps. If you uncheck it, you may need to go to Settings>Apps>[app to send with]>Permissions and enable the 'Storage' permission manually."/>
+<PreferenceScreen 
+    android:title="How to use"
+    android:summary="Just choose Send Reduced when sharing your photo, and you'll be asked which app to send it with after reduction. You can also attach photos to emails or texts by choosing Send Reduced." 
+    android:key="howto"
+    />
+<PreferenceScreen 
+    android:title="Upgrade to Pro"
+    android:summary="By default, all file information is stripped from the photos. In the Pro version, you can choose to include some of it." 
+    android:key="upgrade"
+    />
+
+<PreferenceCategory 
+    android:key="outputPrivacy"
+    android:title="Output privacy settings"
+    >
+    
+<ListPreference
+	android:title="Output filename"
+	android:entries="@array/outputs"    	
+	android:entryValues="@array/outputs"
+	android:key="output"
+	android:defaultValue="random"/>
+<CheckBoxPreference
+    android:title="Include GPS location"
+    android:key="exifLocation"
+    android:defaultValue="false"/>
+<CheckBoxPreference
+    android:title="Include EXIF location data"
+    android:key="exifLocation"
+    android:defaultValue="false"/>
+<CheckBoxPreference
+    android:title="Include EXIF timestamp"
+    android:key="exifDateTime"
+    android:defaultValue="false"/>
+<CheckBoxPreference
+    android:title="Include EXIF device info"
+    android:key="exifMake"
+    android:defaultValue="false"/>
+<CheckBoxPreference
+    android:title="Include EXIF Camera settings"
+    android:key="exifSettings"
+    android:defaultValue="false"/>
+</PreferenceCategory>
+
+  <PreferenceCategory android:title="Licenses and copyrights">
+    <PreferenceScreen
+            android:title="View information">
+        <intent android:action="mobi.omegacentauri.SendReduced_pro.LICENSE"/>
+        </PreferenceScreen>
+        </PreferenceCategory> 
+</PreferenceScreen>

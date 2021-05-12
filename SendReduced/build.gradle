@@ -1,0 +1,59 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        release {
+        }
+    }
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+
+    defaultConfig {
+        applicationId "mobi.omegacentauri.SendReduced"
+        minSdkVersion 5
+        targetSdkVersion 30
+        signingConfig signingConfigs.debug
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    productFlavors {
+        pro {
+            applicationId 'mobi.omegacentauri.SendReduced_pro'
+            dimension 'pro_or_free'
+        }
+        free {
+        dimension 'pro_or_free'
+            applicationId 'mobi.omegacentauri.SendReduced'
+        }
+    }
+    flavorDimensions 'pro_or_free'
+
+    lintOptions {
+        checkReleaseBuilds false
+        //If you want to continue even if errors found use following line
+        abortOnError false
+    }
+
+    allprojects {
+        afterEvaluate { project ->
+            def propsFile = rootProject.file('../SendReduced-keys.properties')
+            def configName = 'release'
+
+            if (propsFile.exists() && android.signingConfigs.hasProperty(configName)) {
+                def props = new Properties()
+                props.load(new FileInputStream(propsFile))
+                android.signingConfigs[configName].storeFile = file(props['storeFile'])
+                android.signingConfigs[configName].storePassword = props['storePassword']
+                android.signingConfigs[configName].keyAlias = props['keyAlias']
+                android.signingConfigs[configName].keyPassword = props['keyPassword']
+            }
+        }
+    }
+}
