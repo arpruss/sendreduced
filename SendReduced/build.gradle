@@ -12,7 +12,7 @@ android {
         applicationId "mobi.omegacentauri.SendReduced"
         minSdkVersion 5
         targetSdkVersion 30
-        signingConfig signingConfigs.debug
+        signingConfig signingConfigs.release
     }
 
     buildTypes {
