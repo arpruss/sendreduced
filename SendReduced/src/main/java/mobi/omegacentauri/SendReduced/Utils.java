@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -82,8 +83,9 @@ public class Utils {
 		String path = image.saveImage();
 		if (path == null) 
 			return null;
-		if (fileProvider())
+		if (fileProvider()) {
 			return FileProvider.getUriForFile(activity, activity.getPackageName(), new File(path));
+		}
 		else
 			return Uri.fromFile(new File(path));		
 	}
@@ -93,11 +95,12 @@ public class Utils {
 		if (out == null)
 			return false;
 		Intent i = new Intent(android.content.Intent.ACTION_SEND);
+		i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 		i.putExtra(android.content.Intent.EXTRA_STREAM, out);
 		i.setType(MIME_TYPE);
 //		i.putExtra(Intent.EXTRA_TEXT, " ");
-		SendReduced.log("uri "+uri);
-		startWithChooser(activity, new Uri[] { uri }, i);
+		SendReduced.log("uri "+out);
+		startWithChooser(activity, new Uri[] { out }, i);
 		return true;
 	}
 	
@@ -111,9 +114,10 @@ public class Utils {
 		startWithChooser(activity, grant, i, "Share reduced photo via");
 	}
 	
+	@SuppressLint("WrongConstant")
 	private static void startWithChooser(Activity activity, Uri[] grant, Intent i, String title) {
 		i.putExtra(INTENT_FROM_ME, true);
-		i.setFlags(PackageManager.MATCH_DEFAULT_ONLY);
+		i.setFlags(PackageManager.MATCH_DEFAULT_ONLY); //TODO:fix
 		if (grant != null) {
 			List<ResolveInfo> possibles = activity.getPackageManager().queryIntentActivities(i, PackageManager.MATCH_DEFAULT_ONLY);
 			for (ResolveInfo r : possibles) {

@@ -18,7 +18,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class SendReduced extends Activity {
-	static boolean DEBUG = false;
+	static boolean DEBUG = true;
 
 	public static void log(String s) {
 		if (DEBUG)

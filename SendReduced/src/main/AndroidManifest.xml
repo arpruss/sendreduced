@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="mobi.omegacentauri.SendReduced"
-    android:versionCode="2000"
-    android:versionName="0.20" >
+    android:versionCode="2100"
+    android:versionName="0.21" >
 
     <uses-sdk
         android:minSdkVersion="5"
@@ -13,8 +13,9 @@
         android:normalScreens="true"
         android:xlargeScreens="true" />
 
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="27"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/> <!--
+        android:maxSdkVersion="27 -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
         android:icon="@drawable/icon"

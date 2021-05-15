@@ -30,6 +30,7 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 import android.text.TextUtils;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 import org.xmlpull.v1.XmlPullParserException;
 import java.io.File;
@@ -619,10 +620,12 @@ public class FileProvider extends ContentProvider {
             } catch (IOException e) {
                 throw new IllegalArgumentException("Failed to resolve canonical path for " + file);
             }
+            Log.v("SendReduced", "path "+path);
             // Find the most-specific root path
             Map.Entry<String, File> mostSpecific = null;
             for (Map.Entry<String, File> root : mRoots.entrySet()) {
                 final String rootPath = root.getValue().getPath();
+                Log.v("SendReduced", "rootPath "+rootPath);
                 if (path.startsWith(rootPath) && (mostSpecific == null
                         || rootPath.length() > mostSpecific.getValue().getPath().length())) {
                     mostSpecific = root;

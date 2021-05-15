@@ -5,13 +5,11 @@ android {
         release {
         }
     }
-    compileSdkVersion 30
+    compileSdkVersion 29
     buildToolsVersion "30.0.3"
 
     defaultConfig {
         applicationId "mobi.omegacentauri.SendReduced"
-        minSdkVersion 5
-        targetSdkVersion 30
         signingConfig signingConfigs.release
     }
 
