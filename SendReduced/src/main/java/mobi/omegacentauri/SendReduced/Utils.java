@@ -16,6 +16,7 @@ import java.util.Map;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -99,19 +100,18 @@ public class Utils {
 		i.putExtra(android.content.Intent.EXTRA_STREAM, out);
 		i.setType(MIME_TYPE);
 //		i.putExtra(Intent.EXTRA_TEXT, " ");
-		SendReduced.log("uri "+out);
+		SendReduced.log("uri: "+out);
 		startWithChooser(activity, new Uri[] { out }, i);
 		return true;
 	}
 	
 	static void startActivityForResultWithChooser(Activity activity, Intent i, String title, int code) {
 		i.putExtra(Utils.INTENT_FROM_ME, true);
-		//activity.startActivityForResult(Intent.createChooser(i, title), code);
 		activity.startActivityForResult(i, code);
 	}
 	
 	static void startWithChooser(Activity activity, Uri[] grant, Intent i) {
-		startWithChooser(activity, grant, i, "Share reduced photo via");
+		startWithChooser(activity, grant, i, "Share reduced photo with...");
 	}
 	
 	@SuppressLint("WrongConstant")
@@ -127,7 +127,12 @@ public class Utils {
 			}
 		}
 
-		// activity.startActivity(Intent.createChooser(i, title));
+		if (PreferenceManager.getDefaultSharedPreferences(activity).getBoolean(Options.PREF_INCLUDE_DIRECT, true)) {
+			i = Intent.createChooser(i, title);
+			if (Build.VERSION.SDK_INT >= 24) {
+				i.putExtra(Intent.EXTRA_EXCLUDE_COMPONENTS, new ComponentName[]{activity.getComponentName()});
+			}
+		}
 		activity.startActivity(i);
 	}
 	

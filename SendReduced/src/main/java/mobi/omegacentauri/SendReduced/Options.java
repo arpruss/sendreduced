@@ -27,6 +27,7 @@ public class Options extends PreferenceActivity implements OnSharedPreferenceCha
 	public static final String PREF_EXIF_MAKE_MODEL = "exifMake";
 	public static final String PREF_EXIF_DATETIME = "exifDateTime";
 	public static final String PREF_EXIF_SETTINGS = "exifSettings";
+	public static final String PREF_INCLUDE_DIRECT = "includeDirect";
 	private static final String PREF_CONTENT_PROVIDER = "contentProvider2";
 	
 	public static final String[] proKeys = { PREF_NAME, PREF_EXIF_LOCATION, PREF_EXIF_MAKE_MODEL, PREF_EXIF_DATETIME, "outputPrivacy" };
@@ -64,19 +65,17 @@ public class Options extends PreferenceActivity implements OnSharedPreferenceCha
 	}
 
 	static private boolean defaultContentProviderSetting() {
-		if (Build.VERSION.SDK_INT >= 28)
-			return true;
-		else
-			return false;
+		return Build.VERSION.SDK_INT >= 23;
 	}
 
 	static public boolean useContentProvider(SharedPreferences options) {
-		if (Build.VERSION.SDK_INT >= 28)
+		return Build.VERSION.SDK_INT >= 23;
+/*		if (Build.VERSION.SDK_INT >= 28)
 			return true;
 		else if (Build.VERSION.SDK_INT < 23)
 			return false;
 		else
-			return options.getBoolean(PREF_CONTENT_PROVIDER, defaultContentProviderSetting());
+			return options.getBoolean(PREF_CONTENT_PROVIDER, defaultContentProviderSetting()); */
 	}
 
 	@Override
@@ -100,7 +99,7 @@ public class Options extends PreferenceActivity implements OnSharedPreferenceCha
 			setSummary(i);
 		}
 
-		if (Build.VERSION.SDK_INT < 23 || Build.VERSION.SDK_INT >= 28) {
+		if (true || Build.VERSION.SDK_INT < 23 || Build.VERSION.SDK_INT >= 28) {
 			Preference pref = findPreference(PREF_CONTENT_PROVIDER);
 			if (pref != null)
 				getPreferenceScreen().removePreference(pref);

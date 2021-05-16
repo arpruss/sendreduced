@@ -13,11 +13,11 @@
 	android:entryValues="@array/qualities"
 	android:key="quality"
 	android:defaultValue="85"/>
-<CheckBoxPreference
+<!-- <CheckBoxPreference
     android:title="Can save destination"
     android:key="allowSave"
     android:defaultValue="false"
-    android:summary="If you always share to the same destination app, check this box and you can set it next time you share. To unset, go to Settings>Apps, choose your destination app and clear its defaults."/>
+    android:summary="If you always share to the same destination app, check this box and you can set it next time you share. To unset, go to Settings>Apps, choose your destination app and clear its defaults."/> -->
 <CheckBoxPreference 
     android:title="Use content provider"
     android:key="contentProvider2"
@@ -28,7 +28,12 @@
     android:summary="Just choose Send Reduced when sharing your photo, and you'll be asked which app to send it with after reduction. You can also attach photos to emails or texts by choosing Send Reduced." 
     android:key="howto"
     />
-<PreferenceScreen 
+<CheckBoxPreference
+		android:title="Include specific recipients"
+		android:key="includeDirect"
+		android:defaultValue="true"
+		android:summary="Include specific recipients in share dialog."/>
+<PreferenceScreen
     android:title="Upgrade to Pro"
     android:summary="By default, all file information is stripped from the photos. In the Pro version, you can choose to include some of it." 
     android:key="upgrade"
