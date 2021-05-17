@@ -75,7 +75,7 @@
   <PreferenceCategory android:title="Licenses and copyrights">
     <PreferenceScreen
             android:title="View information">
-        <intent android:action="mobi.omegacentauri.SendReduced_pro.LICENSE"/>
+        <intent android:action="@string/license_intent"/>
         </PreferenceScreen>
         </PreferenceCategory> 
 </PreferenceScreen>

@@ -25,10 +25,12 @@ android {
         pro {
             applicationId 'mobi.omegacentauri.SendReduced_pro'
             dimension 'pro_or_free'
+            resValue 'string', 'license_intent', applicationId + ".LICENSE"
         }
         free {
         dimension 'pro_or_free'
             applicationId 'mobi.omegacentauri.SendReduced'
+            resValue 'string', 'license_intent', applicationId + ".LICENSE"
         }
     }
     flavorDimensions 'pro_or_free'
