@@ -7,6 +7,7 @@ import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -264,10 +265,157 @@ public class Utils {
 			return Uri.fromFile(new File(path));
 	}
 
+	private static class SuperStripStream extends OutputStream {
+		private enum jpegState {
+			DEFAULT,
+			COPYING,
+			SKIPPING,
+			ECS,
+			ECS_MARKER,
+			MARKER,
+			DONE,
+			COPYING_BEFORE_ECS;
+		};
+
+		jpegState state = jpegState.DEFAULT;
+
+		private final OutputStream rawStream;
+		private int copyLength;
+		private int skipLength;
+		private int[] markerData = new int[18];
+		private int markerPosition;
+		private boolean haveJFIF = false;
+
+		public SuperStripStream(OutputStream os) {
+			this.rawStream = os;
+			this.state = jpegState.DEFAULT;
+		}
+
+		int markerDataGet16Bits(int position) {
+			return ((0xFF & markerData[position]) << 8) | (0xFF & markerData[position+1]);
+		}
+
+		@Override
+		public void write(int b) throws IOException {
+			switch(this.state) {
+				case DEFAULT:
+					if ((b & 0xFF) == 0xFF) {
+						this.state = jpegState.MARKER;
+						markerData[0] = b;
+						markerPosition = 1;
+					}
+					break;
+				case COPYING:
+					this.rawStream.write(b);
+					copyLength--;
+					if (copyLength <= 0)
+						this.state = jpegState.DEFAULT;
+					break;
+				case COPYING_BEFORE_ECS:
+					this.rawStream.write(b);
+					copyLength--;
+					if (copyLength <= 0) {
+						this.state = jpegState.ECS;
+					}
+					break;
+				case SKIPPING:
+					skipLength--;
+					if (skipLength <= 0)
+						this.state = jpegState.DEFAULT;
+					break;
+				case ECS_MARKER:
+					this.rawStream.write(b);
+					if ((b & 0xFF) == 0xD9) {
+						this.state = jpegState.DONE;
+					}
+					else {
+						this.state = jpegState.ECS;
+					}
+					break;
+				case ECS:
+					this.rawStream.write(b);
+					if ((b & 0xFF) == 0xFF)
+						this.state = jpegState.ECS_MARKER;
+					break;
+				case MARKER:
+					boolean writeMarker = false;
+					markerData[markerPosition] = b;
+					markerPosition++;
+					if (markerPosition == 2) {
+						if ((b & 0xFF) == 0xD8) {
+							writeMarker = true;
+							this.state = jpegState.DEFAULT;
+						}
+					}
+					else if (markerPosition == 4) {
+						int type = markerData[1] & 0xff;
+						if (0xE1 <= type && type <= 0xEF) {
+							skipLength = markerDataGet16Bits(2)-2;
+							this.state = jpegState.SKIPPING;
+						}
+						else if (0xE0 != type) {
+							writeMarker = true;
+							copyLength = markerDataGet16Bits(2)-2;
+							if (0xDA == type) {
+								this.state = jpegState.COPYING_BEFORE_ECS;
+							}
+							else {
+								this.state = jpegState.COPYING;
+							}
+						}
+						else if (0xE0 == type) {
+							// APP0
+							if (haveJFIF) {
+								// JFXX
+								skipLength = markerDataGet16Bits(2)-2;
+								this.state = jpegState.SKIPPING;
+							}
+							else {
+								haveJFIF = true;
+							}
+						}
+					}
+					else if (markerPosition == 18) {
+						// JFIF
+						markerData[16] = 0;
+						markerData[17] = 0;
+						skipLength = markerDataGet16Bits(2)-16;
+						markerData[2] = 0;
+						markerData[3] = 18-2;
+						writeMarker = true;
+						state = jpegState.SKIPPING;
+					}
+
+					if (writeMarker) {
+						for (int i=0; i<markerPosition; i++)
+							this.rawStream.write(markerData[i]);
+					}
+
+					if ((jpegState.SKIPPING == state && skipLength <= 0) || (jpegState.COPYING == state && copyLength <= 0))
+						state = jpegState.DEFAULT;
+
+					break;
+				case DONE:
+					break;
+			}
+		}
+
+		@Override
+		public void flush() throws IOException {
+			this.rawStream.flush();
+		}
+
+		@Override
+		public void close() throws IOException {
+			this.rawStream.close();
+		}
+	}
+
 	class ReducedImage {
 		long origDate;
 		Bitmap bmp;
 		String origName;
+		private boolean superStrip;
 		private boolean preserveExifLocation;
 		private boolean preserveExifMake;
 		private boolean preserveExifDate;
@@ -291,8 +439,9 @@ public class Utils {
 			preserveExifMake = options.getBoolean(Options.PREF_EXIF_MAKE_MODEL, false);
 			preserveExifDate = options.getBoolean(Options.PREF_EXIF_DATETIME, false);
 			preserveExifSettings = options.getBoolean(Options.PREF_EXIF_SETTINGS, false);
+			superStrip = SendReduced.pro(activity) && options.getBoolean(Options.PREF_SUPER_STRIP, false);
 			haveExif = SendReduced.pro(activity) && ( preserveExifLocation || preserveExifMake || 
-					preserveExifDate || preserveExifSettings );
+					preserveExifDate || preserveExifSettings ) && ! superStrip;
 
 			bmp = null;
 			
@@ -488,7 +637,9 @@ public class Utils {
 				File temp = createOutFile(); //File.createTempFile(PREFIX, ".jpg", storage);
 				temp.setReadable(true, false);
 				SendReduced.log("Compressing to "+temp);
-				FileOutputStream out = new FileOutputStream(temp);
+				OutputStream out = new FileOutputStream(temp);
+				if (superStrip)
+					out = new SuperStripStream(out);
 				boolean status = bmp.compress(Bitmap.CompressFormat.JPEG, outQuality, out);
 				out.close();
 				if (!status) {

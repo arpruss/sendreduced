@@ -28,9 +28,10 @@ public class Options extends PreferenceActivity implements OnSharedPreferenceCha
 	public static final String PREF_EXIF_DATETIME = "exifDateTime";
 	public static final String PREF_EXIF_SETTINGS = "exifSettings";
 	public static final String PREF_INCLUDE_DIRECT = "includeDirect";
+	public static final String PREF_SUPER_STRIP = "superStrip";
 	private static final String PREF_CONTENT_PROVIDER = "contentProvider2";
 	
-	public static final String[] proKeys = { PREF_NAME, PREF_EXIF_LOCATION, PREF_EXIF_MAKE_MODEL, PREF_EXIF_DATETIME, "outputPrivacy" };
+	public static final String[] proKeys = { PREF_NAME, PREF_EXIF_LOCATION, PREF_EXIF_MAKE_MODEL, PREF_EXIF_DATETIME, PREF_SUPER_STRIP, "outputPrivacy" };
 	
 	private static String[] summaryKeys = { PREF_RESOLUTION, PREF_QUALITY, PREF_NAME };
 	private static int[] summaryEntryValues = { R.array.resolutions, R.array.qualities, R.array.outputs };
