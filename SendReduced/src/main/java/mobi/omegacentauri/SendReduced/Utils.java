@@ -1,5 +1,6 @@
 package mobi.omegacentauri.SendReduced;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
@@ -8,6 +9,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -202,7 +204,10 @@ public class Utils {
 		if (c == null)
 			return INVALID_ROTATION;
 		c.moveToFirst();
-		int o = c.getInt(c.getColumnIndex(MediaStore.Images.Media.ORIENTATION));
+		int columnIndex = c.getColumnIndex(MediaStore.Images.Media.ORIENTATION);
+		if (columnIndex == -1)
+			return INVALID_ROTATION;
+		int o = c.getInt(columnIndex);
 		c.close();
 		return o;
 	}
@@ -250,8 +255,8 @@ public class Utils {
 
 	public Uri offerReduced(Uri uriIn) {
 		ContentResolver cr = activity.getContentResolver();
-		int orientation = getOrientation(cr, uriIn);
-		SendReduced.log("orientation: "+orientation);
+//		int orientation = getOrientation(cr, uriIn);
+//		SendReduced.log("orientation: "+orientation);
 		ReducedImage image = new ReducedImage(uriIn);
 		if (image.bmp == null)
 			return null;
@@ -428,19 +433,22 @@ public class Utils {
 		private final String[] MAKE_TAGS = { ExifInterface.TAG_MAKE, ExifInterface.TAG_MODEL };
 		private final String[] SETTINGS_TAGS = { ExifInterface.TAG_APERTURE, ExifInterface.TAG_EXPOSURE_TIME, ExifInterface.TAG_FLASH, ExifInterface.TAG_FOCAL_LENGTH, 
 				ExifInterface.TAG_ISO, ExifInterface.TAG_WHITE_BALANCE };
-		
+
+		private String mode;
 		private Map<String,String> exifLocation;
 		private Map<String,String> exifMake;
 		private Map<String,String> exifDate;
 		private Map<String,String> exifSettings;
 		
 		public ReducedImage(Uri uri) {
+			Boolean pro = SendReduced.pro(activity);
+			mode = pro ? options.getString(Options.PREF_NAME, Options.OPT_NAME_RANDOM) : Options.OPT_NAME_RANDOM;
 			preserveExifLocation = options.getBoolean(Options.PREF_EXIF_LOCATION, false);
 			preserveExifMake = options.getBoolean(Options.PREF_EXIF_MAKE_MODEL, false);
 			preserveExifDate = options.getBoolean(Options.PREF_EXIF_DATETIME, false);
 			preserveExifSettings = options.getBoolean(Options.PREF_EXIF_SETTINGS, false);
-			superStrip = SendReduced.pro(activity) && options.getBoolean(Options.PREF_SUPER_STRIP, false);
-			haveExif = SendReduced.pro(activity) && ( preserveExifLocation || preserveExifMake || 
+			superStrip = pro && options.getBoolean(Options.PREF_SUPER_STRIP, false);
+			haveExif = pro && ( preserveExifLocation || preserveExifMake ||
 					preserveExifDate || preserveExifSettings ) && ! superStrip;
 
 			bmp = null;
@@ -464,10 +472,14 @@ public class Utils {
 			if (uri.getScheme().equalsIgnoreCase("file")) {
 				origPath = uri.getPath();
 				File f = new File(origPath);
-				origDate = f.lastModified();
 				origName = f.getName();
+				try {
+					origDate = f.lastModified();
+				}
+				catch(Exception e) {}
 			}
-			else if (uri.getScheme().equalsIgnoreCase("content")) {
+
+			if (origDate < 0 || uri.getScheme().equalsIgnoreCase("content")) {
 				try {
 					Cursor c = cr.query(uri, null, null, null, null);
 					if (c != null) {
@@ -476,17 +488,21 @@ public class Utils {
 								int id = c.getColumnIndex(Images.Media.DATA);
 								if (id != -1) {
 									origPath = c.getString(id);
-									origName = new File(origPath).getName();
+									if (origName != null)
+										origName = new File(origPath).getName();
 								}
-	
-								id = c.getColumnIndex(Images.Media.DATE_ADDED);
-								if (id != -1) {
-									origDate = c.getLong(id)  * 1000;
-								}
-								else {
-									id = c.getColumnIndex(Images.Media.DATE_MODIFIED);
-									if (id != -1)
+
+								if (origDate < 0) {
+									id = c.getColumnIndex(Images.Media.DATE_ADDED);
+									SendReduced.log("date id "+id);
+									if (id != -1) {
 										origDate = c.getLong(id) * 1000;
+									} else {
+										id = c.getColumnIndex(Images.Media.DATE_MODIFIED);
+										SendReduced.log("date id2 "+id);
+										if (id != -1)
+											origDate = c.getLong(id) * 1000;
+									}
 								}
 							}
 							catch(Exception e) {
@@ -506,26 +522,63 @@ public class Utils {
 				SendReduced.log("Name "+origName);
 			SendReduced.log("need to decode "+data.length+" bytes");
 
-			if (origPath == null)
-				haveExif = false;
-			
-			if (haveExif) {
+			int orientation = getOrientation(cr, uri);
+
+			InputStream input = new ByteArrayInputStream(data);
+
+			if (haveExif || orientation == INVALID_ROTATION || (origDate < 0 && mode.equals(Options.OPT_NAME_DATE_TIME)) ) {
 				try {
-					ExifInterface ei = new ExifInterface(origPath);
+					ExifInterface ei = new ExifInterface(input);
+					if (orientation == INVALID_ROTATION) {
+						try {
+							int o = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+							SendReduced.log("exif orientation " + o);
+							switch (o) {
+								case ExifInterface.ORIENTATION_ROTATE_270:
+									orientation = 270;
+									break;
+								case ExifInterface.ORIENTATION_ROTATE_180:
+									orientation = 180;
+									break;
+								case ExifInterface.ORIENTATION_ROTATE_90:
+									orientation = 90;
+									break;
+								case ExifInterface.ORIENTATION_NORMAL:
+									orientation = 0;
+									break;
+							}
+						} catch (Exception e) {
+						}
+					}
+
+					if (origDate < 0) {
+						String date = ei.getAttribute(ExifInterface.TAG_DATETIME_ORIGINAL);
+						if (date == null) {
+							date = ei.getAttribute(ExifInterface.TAG_DATETIME_DIGITIZED);
+							if (date == null) {
+								date = ei.getAttribute(ExifInterface.TAG_DATETIME);
+							}
+						}
+						if (date != null) {
+							origDate = parseExifDate(date);
+						}
+					}
+
 					if (preserveExifDate)
 						exifDate = getTags(ei, DATETIME_TAGS);
 					if (preserveExifLocation)
-						exifDate = getTags(ei, LOCATION_TAGS);
+						exifLocation = getTags(ei, LOCATION_TAGS);
 					if (preserveExifMake)
 						exifMake = getTags(ei, MAKE_TAGS);
 					if (preserveExifSettings)
 						exifSettings = getTags(ei, SETTINGS_TAGS);
-				} catch (IOException e) {
+				}
+				catch (Exception e) {
+					SendReduced.log("exif " + e);
 				}
 			}
-			
-			int o = getOrientation(cr, uri);
-			SendReduced.log("orientation = "+o);
+
+			SendReduced.log("orientation = "+orientation);
 			
 			Bitmap inBmp = BitmapFactory.decodeByteArray(data, 0, data.length);
 			
@@ -549,12 +602,12 @@ public class Utils {
 				transform = true;
 			}
 			
-			if (INVALID_ROTATION != o) {
-				m.postRotate(o);
+			if (INVALID_ROTATION != orientation && orientation != 0) {
+				m.postRotate(orientation);
 				transform = true;
 			}
 					
-			SendReduced.log("image: "+w+"x"+h+" ["+o+"]");
+			SendReduced.log("image: "+w+"x"+h+" ["+orientation+"]");
 
 			if (transform) {
 				bmp = Bitmap.createBitmap(inBmp, 0, 0, w, h, m, true);
@@ -565,7 +618,18 @@ public class Utils {
 				bmp = inBmp;
 			}
 		}
-		
+
+		private long parseExifDate(String date) {
+			SimpleDateFormat format = new SimpleDateFormat("yyyy:MM:dd HH:mm:ss");
+			try {
+				Date d = format.parse(date);
+				SendReduced.log("parsing "+date+" to "+d.toString());
+				return d.getTime();
+			} catch (ParseException e) {
+				return -1;
+			}
+		}
+
 		private Map<String, String> getTags(ExifInterface ei,
 				String[] tags) {
 			Map<String, String> map = new HashMap<String, String>();
@@ -586,7 +650,6 @@ public class Utils {
 		}
 
 		File createOutFile() throws IOException {
-			String mode = options.getString(Options.PREF_NAME, Options.OPT_NAME_RANDOM);
 			File outFile = null;
 			SendReduced.log(mode);
 
@@ -595,9 +658,8 @@ public class Utils {
 				sequencePos++;
 			}
 			else if (mode.equals(Options.OPT_NAME_DATE_TIME) && origDate > 0) {
-				SendReduced.log("zz "+origDate);
 				Date d = new Date(origDate);
-				String base = curCacheDir + "/" + new SimpleDateFormat("yyyyMMDD_HHmmss").format(d);
+				String base = curCacheDir + "/" + new SimpleDateFormat("yyyyMMdd_HHmmss").format(d);
 				File f = new File(base+".jpg");
 				if (! f.exists()) {
 					outFile = f;					

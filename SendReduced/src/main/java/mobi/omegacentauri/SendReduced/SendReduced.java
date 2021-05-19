@@ -18,7 +18,8 @@ import android.util.Log;
 import android.widget.Toast;
 
 public class SendReduced extends Activity {
-	static boolean DEBUG = true;
+	static boolean DEBUG = false;
+	static boolean CRASHLOG = true;
 
 	public static void log(String s) {
 		if (DEBUG)
@@ -34,7 +35,7 @@ public class SendReduced extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		if (DEBUG)
+		if (CRASHLOG)
 			crashLogHandler();
 
 		SharedPreferences options = PreferenceManager.getDefaultSharedPreferences(this);

@@ -51,7 +51,7 @@
 	android:key="output"
 	android:defaultValue="random"/>
 <CheckBoxPreference
-    android:title="Include EXIF location data"
+    android:title="Include EXIF GPS data"
     android:key="exifLocation"
     android:defaultValue="false"/>
 <CheckBoxPreference
@@ -63,14 +63,14 @@
     android:key="exifMake"
     android:defaultValue="false"/>
 <CheckBoxPreference
-    android:title="Include EXIF Camera settings"
+    android:title="Include EXIF basic camera settings"
     android:key="exifSettings"
     android:defaultValue="false"/>
 <CheckBoxPreference
 	android:title="Super strip (experimental)"
 	android:key="superStrip"
 	android:defaultValue = "false"
-	android:summary="Strip all non-image data from file for privacy. The EXIF options will be ignored. May improve compatibility with older Windows systems."
+	android:summary="Strip all non-image data from file for privacy. The above EXIF options will be ignored. May improve compatibility with older Windows systems."
 	/>
 </PreferenceCategory>
 
