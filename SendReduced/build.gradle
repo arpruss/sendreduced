@@ -28,7 +28,7 @@ android {
             resValue 'string', 'license_intent', applicationId + ".LICENSE"
         }
         free {
-        dimension 'pro_or_free'
+            dimension 'pro_or_free'
             applicationId 'mobi.omegacentauri.SendReduced'
             resValue 'string', 'license_intent', applicationId + ".LICENSE"
         }
