@@ -30,7 +30,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.media.ExifInterface;
+import androidx.exifinterface.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -431,8 +431,8 @@ public class Utils {
 			ExifInterface.TAG_GPS_LATITUDE, ExifInterface.TAG_GPS_LATITUDE_REF, ExifInterface.TAG_GPS_LONGITUDE,
 			ExifInterface.TAG_GPS_LONGITUDE_REF, ExifInterface.TAG_GPS_PROCESSING_METHOD };
 		private final String[] MAKE_TAGS = { ExifInterface.TAG_MAKE, ExifInterface.TAG_MODEL };
-		private final String[] SETTINGS_TAGS = { ExifInterface.TAG_APERTURE, ExifInterface.TAG_EXPOSURE_TIME, ExifInterface.TAG_FLASH, ExifInterface.TAG_FOCAL_LENGTH, 
-				ExifInterface.TAG_ISO, ExifInterface.TAG_WHITE_BALANCE };
+		private final String[] SETTINGS_TAGS = { ExifInterface.TAG_APERTURE_VALUE, ExifInterface.TAG_EXPOSURE_TIME, ExifInterface.TAG_FLASH, ExifInterface.TAG_FOCAL_LENGTH,
+				ExifInterface.TAG_ISO_SPEED, ExifInterface.TAG_WHITE_BALANCE };
 
 		private String mode;
 		private Map<String,String> exifLocation;

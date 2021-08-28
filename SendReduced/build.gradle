@@ -11,6 +11,8 @@ android {
     defaultConfig {
         applicationId "mobi.omegacentauri.SendReduced"
         signingConfig signingConfigs.release
+        minSdkVersion 14
+        targetSdkVersion 30
     }
 
     buildTypes {
@@ -28,7 +30,7 @@ android {
             resValue 'string', 'license_intent', applicationId + ".LICENSE"
         }
         free {
-        dimension 'pro_or_free'
+            dimension 'pro_or_free'
             applicationId 'mobi.omegacentauri.SendReduced'
             resValue 'string', 'license_intent', applicationId + ".LICENSE"
         }
@@ -56,4 +58,8 @@ android {
             }
         }
     }
+}
+dependencies {
+    implementation 'androidx.exifinterface:exifinterface:1.3.2'
+    //  compile 'com.android.support.exifinterface:25.1.0'
 }
