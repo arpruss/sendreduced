@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="mobi.omegacentauri.SendReduced"
-    android:versionCode="2700"
-    android:versionName="0.27" >
+    android:versionCode="2800"
+    android:versionName="0.28" >
 
     <supports-screens
         android:largeScreens="true"
